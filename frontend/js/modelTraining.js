@@ -1724,10 +1724,10 @@
                             ${displayColumns.map(col => {
             const isLabel = col === label;
             const colDisplay = isLabel ? `[LABEL] ${col}` : col;
-            const maxLength = 50;
+            const maxLength = 25;
             const truncated = col.length > maxLength ? col.substring(0, maxLength) + '...' : col;
             return `
-                                    <th style="padding: 12px; text-align: left; font-weight: 600; color: #374151; position: sticky; top: 0; background: #F9FAFB; ${isLabel ? 'background: #FEF3C7;' : ''}" title="${col}">
+                                    <th style="padding: 10px 12px; text-align: left; font-weight: 600; color: #374151; position: sticky; top: 0; background: #F9FAFB; white-space: nowrap; max-width: 200px; overflow: hidden; text-overflow: ellipsis; ${isLabel ? 'background: #FEF3C7;' : ''}" title="${col}">
                                         ${isLabel ? '[LABEL] ' : ''}${truncated}
                                     </th>
                                 `;
@@ -1745,8 +1745,10 @@
                     '<span style="color: #9CA3AF; font-style: italic;">null</span>' :
                     String(value);
                 const isNumeric = typeof value === 'number' && !isNaN(value);
-                const cellStyle = isNumeric ? 'padding: 10px 12px; color: #1F2937; text-align: right;' : 'padding: 10px 12px; color: #1F2937;';
-                tableHTML += `<td style="${cellStyle}">${displayValue}</td>`;
+                const cellStyle = isNumeric ? 
+                    'padding: 8px 12px; color: #1F2937; text-align: right; white-space: nowrap; max-width: 200px; overflow: hidden; text-overflow: ellipsis;' : 
+                    'padding: 8px 12px; color: #1F2937; white-space: nowrap; max-width: 250px; overflow: hidden; text-overflow: ellipsis;';
+                tableHTML += `<td style="${cellStyle}" title="${displayValue}">${displayValue}</td>`;
             });
             tableHTML += '</tr>';
         });
