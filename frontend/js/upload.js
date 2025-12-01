@@ -225,7 +225,7 @@
         window.fullDatasetFileId = null;
         window.fullDatasetPromise = null;
         window.uploadedData = null;
-        
+
         // Clear localStorage
         try {
             localStorage.removeItem('allData');
@@ -234,10 +234,10 @@
         } catch (e) {
             console.warn('Error clearing localStorage:', e);
         }
-        
+
         // Remove background dataset notice if visible
         removeBackgroundDatasetNotice();
-        
+
         // Clear file input and open file picker
         const fileInput = document.getElementById('fileInput');
         if (fileInput) {
@@ -471,7 +471,7 @@
             // Clear loading state immediately after upload completes
             if (loading) loading.style.display = 'none';
             window.isUploadInProgress = false;
-            
+
             // Re-enable upload button
             if (uploadBtn) {
                 uploadBtn.disabled = false;
@@ -582,7 +582,7 @@
                     console.log('📊 Tabular/EHR data detected - loading FULL dataset...');
 
                     const fileId = data.file_ids[0];
-                    
+
                     // Load FULL dataset immediately
                     try {
                         const dataUrl = `${window.API_BASE_URL || ''}/api/data/${fileId}?full=true`;
@@ -597,9 +597,9 @@
                                 window.totalDatasetCols = fullData.shape ? fullData.shape[1] : window.allColumns.length;
                                 window.fullDatasetLoaded = true;
                                 window.currentFileId = fileId;
-                                
+
                                 console.log(`✅ Full dataset loaded: ${window.allData.length} rows, ${window.allColumns.length} columns`);
-                                
+
                                 // Try to save to localStorage
                                 try {
                                     const serialized = JSON.stringify(window.allData);
@@ -610,12 +610,12 @@
                                 } catch (storageError) {
                                     console.warn('Dataset too large for localStorage');
                                 }
-                                
+
                                 // Show data viewer with full dataset
                                 if (window.showDataViewer) {
                                     window.showDataViewer(data);
                                 }
-                                
+
                                 // Refresh navigation
                                 if (window.refreshNavigationAvailability) {
                                     window.refreshNavigationAvailability();

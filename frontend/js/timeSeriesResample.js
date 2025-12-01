@@ -426,7 +426,7 @@
     window.resampleTimeSeriesData = async function (targetFrequency, originalFrequency) {
         try {
             const fileId = window.timeSeriesData.uploadId;
-            const response = await fetch('${window.API_BASE_URL || ""}/api/time-series/resample', {
+            const response = await fetch(`${window.API_BASE_URL || ""}/api/time-series/resample`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

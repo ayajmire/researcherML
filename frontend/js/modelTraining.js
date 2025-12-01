@@ -2634,7 +2634,7 @@
                     // Call backend training endpoint for this single model
                     let response;
                     try {
-                        response = await fetch('${window.API_BASE_URL || ""}/api/train', {
+                        response = await fetch(`${window.API_BASE_URL || ""}/api/train`, {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json'
