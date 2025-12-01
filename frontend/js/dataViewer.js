@@ -153,7 +153,7 @@
             }
             
             // Load preview first (fast) - full dataset will load in background if needed
-            const response = await fetch(`http://localhost:8000/api/data/${fileId}`);
+            const response = await fetch(`${window.API_BASE_URL || ""}/api/data/${fileId}`);
 
             if (response.ok) {
                 const fileData = await response.json();
@@ -558,7 +558,7 @@
             console.log('🔍 Loading image browser for file_id:', fileId);
             console.log('   Upload data:', data);
 
-            const structureResponse = await fetch(`http://localhost:8000/api/images/${fileId}/structure`);
+            const structureResponse = await fetch(`${window.API_BASE_URL || ""}/api/images/${fileId}/structure`);
             console.log('   Structure response status:', structureResponse.status);
 
             if (!structureResponse.ok) {
@@ -579,7 +579,7 @@
             }
 
             // Get image-label matches
-            const matchesResponse = await fetch(`http://localhost:8000/api/images/${fileId}/match`);
+            const matchesResponse = await fetch(`${window.API_BASE_URL || ""}/api/images/${fileId}/match`);
             const matches = matchesResponse.ok ? await matchesResponse.json() : null;
             console.log('   ✅ Matches loaded:', matches);
 
@@ -781,7 +781,7 @@
 
         // Reload file grid
         const fileId = window.imageBrowserState.fileId;
-        fetch(`http://localhost:8000/api/images/${fileId}/structure`)
+        fetch(`${window.API_BASE_URL || ""}/api/images/${fileId}/structure`)
             .then(r => r.json())
             .then(structure => {
                 const matches = window.imageBrowserState.matches;
@@ -803,14 +803,14 @@
             const previewInfo = document.getElementById('previewInfo');
 
             try {
-                const response = await fetch(`http://localhost:8000/api/images/${browserState.fileId}/file/${encodeURIComponent(filePath)}`);
+                const response = await fetch(`${window.API_BASE_URL || ""}/api/images/${browserState.fileId}/file/${encodeURIComponent(filePath)}`);
                 const fileData = await response.json();
 
                 if (fileData.base64) {
                     previewImg.src = `data:image/${fileData.extension.replace('.', '')};base64,${fileData.base64}`;
                 } else {
                     // Try to load from file_id directly
-                    previewImg.src = `http://localhost:8000/api/images/${fileId}`;
+                    previewImg.src = `${window.API_BASE_URL || ""}/api/images/${fileId}`;
                 }
 
                 previewInfo.innerHTML = `
@@ -830,7 +830,7 @@
             const content = document.getElementById('labelViewerContent');
 
             try {
-                const response = await fetch(`http://localhost:8000/api/images/${browserState.fileId}/file/${encodeURIComponent(filePath)}`);
+                const response = await fetch(`${window.API_BASE_URL || ""}/api/images/${browserState.fileId}/file/${encodeURIComponent(filePath)}`);
                 const fileData = await response.json();
 
                 if (title) title.textContent = filePath;

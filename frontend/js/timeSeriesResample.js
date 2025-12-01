@@ -50,7 +50,7 @@
 
             try {
                 const fileId = window.timeSeriesData.uploadId;
-                const response = await fetch(`http://localhost:8000/api/data/${fileId}?full=true`);
+                const response = await fetch(`${window.API_BASE_URL || ""}/api/data/${fileId}?full=true`);
                 if (response.ok) {
                     const fileData = await response.json();
                     if (fileData.data) {
@@ -426,7 +426,7 @@
     window.resampleTimeSeriesData = async function (targetFrequency, originalFrequency) {
         try {
             const fileId = window.timeSeriesData.uploadId;
-            const response = await fetch('http://localhost:8000/api/time-series/resample', {
+            const response = await fetch('${window.API_BASE_URL || ""}/api/time-series/resample', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

@@ -137,7 +137,8 @@
 
         window.fullDatasetPromise = (async () => {
             try {
-                const fullResponse = await fetch(`http://localhost:8000/api/data/${fileId}?full=true`);
+                const dataUrl = `${window.API_BASE_URL || ''}/api/data/${fileId}?full=true`;
+                const fullResponse = await fetch(dataUrl);
                 if (!fullResponse.ok) {
                     throw new Error(`Full dataset fetch failed with status ${fullResponse.status}`);
                 }
@@ -421,7 +422,9 @@
 
             let response;
             try {
-                response = await fetch('http://localhost:8000/api/upload', {
+                const apiUrl = `${window.API_BASE_URL || ''}/api/upload`;
+                console.log('Uploading to:', apiUrl);
+                response = await fetch(apiUrl, {
                     method: 'POST',
                     body: formData,
                     signal: controller.signal
@@ -582,7 +585,9 @@
                     
                     // Load FULL dataset immediately
                     try {
-                        const fullResponse = await fetch(`http://localhost:8000/api/data/${fileId}?full=true`);
+                        const dataUrl = `${window.API_BASE_URL || ''}/api/data/${fileId}?full=true`;
+                        console.log('Fetching full dataset from:', dataUrl);
+                        const fullResponse = await fetch(dataUrl);
                         if (fullResponse.ok) {
                             const fullData = await fullResponse.json();
                             if (fullData.type === 'tabular' && fullData.data) {
@@ -693,7 +698,7 @@
                     <small style="color: #6B7280; margin-top: 10px; display: block;">
                         Please check:
                         <ul style="margin: 10px 0; padding-left: 20px;">
-                            <li>That the server is running (http://localhost:8000)</li>
+                            <li>That the server is running</li>
                             <li>That your file is not corrupted</li>
                             <li>That your file size is reasonable (try a smaller file if this one is very large)</li>
                             <li>Check the browser console for more details</li>

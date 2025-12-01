@@ -49,7 +49,7 @@
 
         try {
             // Fetch time series data from backend
-            const response = await fetch(`http://localhost:8000/api/data/${fileId}`);
+            const response = await fetch(`${window.API_BASE_URL || ""}/api/data/${fileId}`);
             if (!response.ok) {
                 throw new Error(`Failed to fetch data: ${response.statusText}`);
             }
@@ -211,7 +211,7 @@
     window.loadFullTimeSeriesData = async function (fileId) {
         try {
             // Fetch full dataset from backend
-            const response = await fetch(`http://localhost:8000/api/data/${fileId}?full=true`);
+            const response = await fetch(`${window.API_BASE_URL || ""}/api/data/${fileId}?full=true`);
             if (!response.ok) {
                 // If full data endpoint doesn't exist, use preview data
                 console.warn('Full data endpoint not available, using preview data');

@@ -315,7 +315,7 @@
                     try {
                         const fileId = window.uploadedData.file_ids[0];
                         // For column metadata, use preview (fast)
-                        const response = await fetch(`http://localhost:8000/api/data/${fileId}`);
+                        const response = await fetch(`${window.API_BASE_URL || ""}/api/data/${fileId}`);
                         if (response.ok) {
                             const fileData = await response.json();
                             if (fileData.type === 'tabular' && fileData.columns) {
@@ -370,7 +370,7 @@
                 // Check if we already have full dataset in memory
                 if (!window.allData || window.allData.length === 0 || !window.fullDatasetLoaded) {
                     console.log('   Fetching full dataset for data cleaning...');
-                    const response = await fetch(`http://localhost:8000/api/data/${fileId}?full=true`);
+                    const response = await fetch(`${window.API_BASE_URL || ""}/api/data/${fileId}?full=true`);
                     console.log('   Response status:', response.status);
 
                     if (response.ok) {
@@ -614,7 +614,7 @@
                     // Fallback to backend
                     const fileId = window.uploadedData.file_ids[0];
                     const encodedColumn = encodeURIComponent(column);
-                    const response = await fetch(`http://localhost:8000/api/column-analysis/${fileId}?column_name=${encodedColumn}`);
+                    const response = await fetch(`${window.API_BASE_URL || ""}/api/column-analysis/${fileId}?column_name=${encodedColumn}`);
                     if (response.ok) {
                         columnData = await response.json();
                         // Merge in the preserved variable_type
@@ -640,7 +640,7 @@
                     const fileId = window.uploadedData.file_ids[0];
                     const encodedColumn = encodeURIComponent(column);
 
-                    const response = await fetch(`http://localhost:8000/api/column-analysis/${fileId}?column_name=${encodedColumn}`);
+                    const response = await fetch(`${window.API_BASE_URL || ""}/api/column-analysis/${fileId}?column_name=${encodedColumn}`);
 
                     if (response.ok) {
                         columnData = await response.json();
@@ -1832,7 +1832,7 @@
             try {
                 const fileId = window.uploadedData.file_ids[0];
                 // Fetch full dataset to get all columns
-                const response = await fetch(`http://localhost:8000/api/data/${fileId}?full=true`);
+                const response = await fetch(`${window.API_BASE_URL || ""}/api/data/${fileId}?full=true`);
                 if (response.ok) {
                     const fileData = await response.json();
                     if (fileData.type === 'tabular' && fileData.columns) {

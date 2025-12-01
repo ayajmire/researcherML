@@ -4,6 +4,10 @@
 (function () {
     'use strict';
 
+    // API Configuration - automatically use current domain
+    window.API_BASE_URL = window.location.origin;
+    console.log('API Base URL:', window.API_BASE_URL);
+
     // Global state variables
     window.selectedFiles = [];
     window.selectedModelType = null;

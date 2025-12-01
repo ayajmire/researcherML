@@ -91,7 +91,7 @@
                 const fileId = window.uploadedData.file_ids[0];
                 // For feature engineering, we only need columns initially (fast)
                 // Full dataset is already in window.allData if available
-                const response = await fetch(`http://localhost:8000/api/data/${fileId}`);
+                const response = await fetch(`${window.API_BASE_URL || ""}/api/data/${fileId}`);
                 if (response.ok) {
                     const fileData = await response.json();
                     if (fileData.type === 'tabular' && fileData.columns) {

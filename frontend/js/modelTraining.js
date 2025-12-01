@@ -1156,7 +1156,7 @@
             // Check if we have full dataset by comparing with backend shape
             try {
                 const fileId = window.uploadedData.file_ids[0];
-                const shapeResponse = await fetch(`http://localhost:8000/api/data/${fileId}`);
+                const shapeResponse = await fetch(`${window.API_BASE_URL || ""}/api/data/${fileId}`);
                 if (shapeResponse.ok) {
                     const shapeData = await shapeResponse.json();
                     const backendRowCount = shapeData.shape ? shapeData.shape[0] : 0;
@@ -1179,7 +1179,7 @@
                         document.body.appendChild(loadingMsg);
 
                         try {
-                            const fullDataResponse = await fetch(`http://localhost:8000/api/data/${fileId}?full=true`);
+                            const fullDataResponse = await fetch(`${window.API_BASE_URL || ""}/api/data/${fileId}?full=true`);
                             if (fullDataResponse.ok) {
                                 const fullData = await fullDataResponse.json();
                                 if (fullData.data && fullData.data.length > 0) {
@@ -2634,7 +2634,7 @@
                     // Call backend training endpoint for this single model
                     let response;
                     try {
-                        response = await fetch('http://localhost:8000/api/train', {
+                        response = await fetch('${window.API_BASE_URL || ""}/api/train', {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json'
@@ -2931,7 +2931,7 @@
                                  MODEL_OPTIONS.ehr.regression.find(m => m.id === sm.model_id)?.name ||
                                  sm.model_id.toUpperCase();
                 resultsHTML += `
-                    <a href="http://localhost:8000/api/download-model/${sm.filename}" 
+                    <a href="${window.API_BASE_URL || ""}/api/download-model/${sm.filename}" 
                        download="${sm.filename}"
                        style="background: white; color: #059669; padding: 10px 18px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 0.95rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px;"
                        onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 4px 8px rgba(0,0,0,0.15)'"
@@ -3144,7 +3144,7 @@
                 if (savedModel) {
                     resultsHTML += `
                         <div style="margin-top: 16px;">
-                            <a href="http://localhost:8000/api/download-model/${savedModel.filename}" 
+                            <a href="${window.API_BASE_URL || ""}/api/download-model/${savedModel.filename}" 
                                download="${savedModel.filename}"
                                style="background: #10B981; color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 600; display: inline-block; margin-right: 10px;">
                                 Download Model
