@@ -84,9 +84,11 @@ index_file = os.path.join(project_root, "index.html")
 
 # Mount static directories
 if os.path.exists(os.path.join(frontend_dir, "css")):
-    app.mount("/css", StaticFiles(directory=os.path.join(frontend_dir, "css")), name="css")
+    app.mount(
+        "/css", StaticFiles(directory=os.path.join(frontend_dir, "css")), name="css")
 if os.path.exists(os.path.join(frontend_dir, "js")):
-    app.mount("/js", StaticFiles(directory=os.path.join(frontend_dir, "js")), name="js")
+    app.mount(
+        "/js", StaticFiles(directory=os.path.join(frontend_dir, "js")), name="js")
 
 # Storage for uploaded files
 uploaded_data_store = {}
@@ -176,8 +178,10 @@ async def upload_files(
         file_id = str(uuid.uuid4())
         file_extension = os.path.splitext(file.filename)[1].lower()
 
-        file_size_mb = file.size / (1024 * 1024) if hasattr(file, 'size') and file.size else 0
-        print(f"📤 Receiving file: {file.filename}, size: {file_size_mb:.2f}MB, extension: {file_extension}")
+        file_size_mb = file.size / \
+            (1024 * 1024) if hasattr(file, 'size') and file.size else 0
+        print(
+            f"📤 Receiving file: {file.filename}, size: {file_size_mb:.2f}MB, extension: {file_extension}")
 
         # Read file content
         try:
@@ -185,13 +189,16 @@ async def upload_files(
             start_read = time.time()
             content = await file.read()
             read_time = time.time() - start_read
-            print(f"✅ File read complete in {read_time:.2f}s, content size: {len(content) / (1024 * 1024):.2f}MB")
+            print(
+                f"✅ File read complete in {read_time:.2f}s, content size: {len(content) / (1024 * 1024):.2f}MB")
 
             # Decode content - this should be fast
             start_decode = time.time()
-            content_str = content.decode('utf-8') if isinstance(content, bytes) else str(content)
+            content_str = content.decode(
+                'utf-8') if isinstance(content, bytes) else str(content)
             decode_time = time.time() - start_decode
-            print(f"✅ File decoded in {decode_time:.2f}s, string length: {len(content_str) / (1024 * 1024):.2f}MB")
+            print(
+                f"✅ File decoded in {decode_time:.2f}s, string length: {len(content_str) / (1024 * 1024):.2f}MB")
         except Exception as e:
             print(f"❌ Error reading file {file.filename}: {str(e)}")
             raise HTTPException(
@@ -292,13 +299,15 @@ async def get_data_preview(file_id: str, full: bool = False):
                     }
                 else:
                     # Process as tabular data
-                    print(f"📊 JSON file loaded: {len(df)} rows, {len(df.columns)} columns")
+                    print(
+                        f"📊 JSON file loaded: {len(df)} rows, {len(df.columns)} columns")
                     if full:
                         print(f"✅ Returning FULL dataset: {len(df)} rows")
                         df_preview = df
                     else:
                         preview_size = 1000
-                        print(f"📋 Returning preview: {preview_size} rows (out of {len(df)} total)")
+                        print(
+                            f"📋 Returning preview: {preview_size} rows (out of {len(df)} total)")
                         df_preview = df.head(preview_size)
                     return {
                         "type": "tabular",
@@ -319,24 +328,29 @@ async def get_data_preview(file_id: str, full: bool = False):
                 # Read full dataset - use chunks for very large files to avoid memory issues
                 file_size_mb = len(content) / (1024 * 1024)
                 if file_size_mb > 50:  # For files larger than 50MB
-                    print(f"📊 Large file detected ({file_size_mb:.2f}MB), reading in chunks...")
+                    print(
+                        f"📊 Large file detected ({file_size_mb:.2f}MB), reading in chunks...")
                     # Read in chunks and concatenate
                     chunk_list = []
                     chunk_size = 100000  # Read 100k rows at a time
                     for chunk in pd.read_csv(io.StringIO(content), dtype=str, chunksize=chunk_size, low_memory=False):
                         chunk_list.append(chunk)
                     df = pd.concat(chunk_list, ignore_index=True)
-                    print(f"✅ Full dataset loaded: {len(df)} rows, {len(df.columns)} columns")
+                    print(
+                        f"✅ Full dataset loaded: {len(df)} rows, {len(df.columns)} columns")
                 else:
-                    df = pd.read_csv(io.StringIO(content), dtype=str, low_memory=False)
-                    print(f"📊 CSV file loaded: {len(df)} rows, {len(df.columns)} columns")
+                    df = pd.read_csv(io.StringIO(content),
+                                     dtype=str, low_memory=False)
+                    print(
+                        f"📊 CSV file loaded: {len(df)} rows, {len(df.columns)} columns")
                 print(f"✅ Returning FULL dataset: {len(df)} rows")
                 df_preview = df
                 df_shape = df.shape
             else:
                 # For preview, only read first 1000 rows to save memory and time
                 # This is MUCH faster for large files (61MB CSV = instant preview)
-                df = pd.read_csv(io.StringIO(content), dtype=str, nrows=1000, low_memory=False)
+                df = pd.read_csv(io.StringIO(content), dtype=str,
+                                 nrows=1000, low_memory=False)
                 # Get total row count by counting newlines (fast approximation)
                 total_rows_approx = content.count('\n')
                 # Adjust for header row - if we read 1000 rows, there's at least 1000 total
@@ -344,8 +358,9 @@ async def get_data_preview(file_id: str, full: bool = False):
                     total_rows_approx = max(total_rows_approx - 1, len(df))
                 else:
                     total_rows_approx = len(df)
-                
-                print(f"📊 CSV preview: {len(df)} rows read (fast mode), ~{total_rows_approx} total rows estimated, {len(df.columns)} columns")
+
+                print(
+                    f"📊 CSV preview: {len(df)} rows read (fast mode), ~{total_rows_approx} total rows estimated, {len(df.columns)} columns")
                 print(f"📋 Returning preview: {len(df)} rows")
                 df_preview = df
                 # Set shape with approximate total (will be accurate when full=true is called)
@@ -366,10 +381,12 @@ async def get_data_preview(file_id: str, full: bool = False):
                     import io
                     # Always read full file for time series, then limit preview if needed
                     df = pd.read_csv(io.StringIO(content))
-                    print(f"📊 TXT time series file loaded: {len(df)} rows, {len(df.columns)} columns")
+                    print(
+                        f"📊 TXT time series file loaded: {len(df)} rows, {len(df.columns)} columns")
                     analysis = analyze_time_series(df)
                     if full:
-                        print(f"✅ Returning FULL time series dataset: {len(df)} rows")
+                        print(
+                            f"✅ Returning FULL time series dataset: {len(df)} rows")
                         return {
                             "type": "time_series",
                             "frequency": analysis['frequency'],
@@ -382,7 +399,8 @@ async def get_data_preview(file_id: str, full: bool = False):
                         }
                     else:
                         preview_size = 100
-                        print(f"📋 Returning time series preview: {preview_size} rows (out of {len(df)} total)")
+                        print(
+                            f"📋 Returning time series preview: {preview_size} rows (out of {len(df)} total)")
                         return {
                             "type": "time_series",
                             "frequency": analysis['frequency'],
@@ -404,13 +422,15 @@ async def get_data_preview(file_id: str, full: bool = False):
                 try:
                     import io
                     df = pd.read_csv(io.StringIO(content), dtype=str)
-                    print(f"📊 TXT file loaded: {len(df)} rows, {len(df.columns)} columns")
+                    print(
+                        f"📊 TXT file loaded: {len(df)} rows, {len(df.columns)} columns")
                     if full:
                         print(f"✅ Returning FULL dataset: {len(df)} rows")
                         df_preview = df
                     else:
                         preview_size = 1000
-                        print(f"📋 Returning preview: {preview_size} rows (out of {len(df)} total)")
+                        print(
+                            f"📋 Returning preview: {preview_size} rows (out of {len(df)} total)")
                         df_preview = df.head(preview_size)
                     return {
                         "type": "tabular",
@@ -663,19 +683,19 @@ async def train_models(request: Request):
         from sklearn.neighbors import KNeighborsClassifier, KNeighborsRegressor
         from sklearn.naive_bayes import GaussianNB
         from sklearn.neural_network import MLPClassifier, MLPRegressor
-        
+
         # Import XGBoost with error handling
         try:
             import xgboost as xgb
         except ImportError:
             xgb = None
-        
+
         # Import LightGBM with error handling
         try:
             import lightgbm as lgb
         except ImportError:
             lgb = None
-        
+
         # Import CatBoost with error handling
         try:
             from catboost import CatBoostClassifier, CatBoostRegressor
@@ -743,7 +763,8 @@ async def train_models(request: Request):
                 elif model_id == 'et':
                     model = ExtraTreesClassifier(random_state=42)
                 elif model_id == 'linreg':
-                    model = LinearRegression()  # Note: normalize parameter deprecated, use StandardScaler if needed
+                    # Note: normalize parameter deprecated, use StandardScaler if needed
+                    model = LinearRegression()
                 elif model_id == 'lasso':
                     model = Lasso(random_state=42)
                 elif model_id == 'ridge':
@@ -1078,7 +1099,8 @@ async def train_models(request: Request):
                             elif isinstance(value, (list, tuple)):
                                 # Convert lists/tuples to lists, handling numpy types
                                 try:
-                                    model_params[key] = [float(v) if isinstance(v, (np.integer, np.floating)) else (str(v) if not isinstance(v, (str, int, float, bool)) else v) for v in value]
+                                    model_params[key] = [float(v) if isinstance(v, (np.integer, np.floating)) else (
+                                        str(v) if not isinstance(v, (str, int, float, bool)) else v) for v in value]
                                 except (TypeError, ValueError):
                                     model_params[key] = [str(v) for v in value]
                             elif isinstance(value, np.integer):
@@ -1100,7 +1122,8 @@ async def train_models(request: Request):
                                     # Fall back to string representation
                                     model_params[key] = str(value)
                     except Exception as e:
-                        print(f"Warning: Could not extract model parameters for {model_id}: {str(e)}")
+                        print(
+                            f"Warning: Could not extract model parameters for {model_id}: {str(e)}")
                         model_params = {}
 
                 results.append({
@@ -1182,6 +1205,7 @@ async def download_model(filename: str = Path(..., description="Model filename (
     if not os.path.exists(model_path):
         raise HTTPException(status_code=404, detail="Model file not found")
     return FileResponse(model_path, media_type="application/octet-stream", filename=filename)
+
 
 @app.post("/api/time-series/resample")
 async def resample_time_series(request: Request):
