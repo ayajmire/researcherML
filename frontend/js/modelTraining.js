@@ -1187,7 +1187,7 @@
                                     window.allColumns = fullData.columns || window.allColumns;
                                     window.fullDatasetLoaded = true;
                                     console.log(`✅ Loaded full dataset: ${window.allData.length} rows`);
-                                    
+
                                     // Recalculate engineered features on the full dataset if any exist
                                     if (window.createdFeatures && window.createdFeatures.length > 0) {
                                         console.log(`Recalculating ${window.createdFeatures.length} engineered feature(s) on full dataset...`);
@@ -1197,7 +1197,7 @@
                                         // Wait a moment for features to be recalculated
                                         await new Promise(resolve => setTimeout(resolve, 500));
                                     }
-                                    
+
                                     // Try to save to localStorage (may fail if too large)
                                     try {
                                         localStorage.setItem('allData', JSON.stringify(window.allData));
@@ -1717,8 +1717,8 @@
 
         let tableHTML = summaryCard;
         tableHTML += `
-            <div style="overflow-x: auto; max-height: 600px; overflow-y: auto;">
-                <table style="width: 100%; border-collapse: collapse; font-size: 0.875rem;">
+            <div style="overflow-x: auto; max-height: 450px; overflow-y: auto; border: 1px solid #E5E7EB; border-radius: 8px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.06);">
+                <table style="width: 100%; border-collapse: collapse; font-size: 0.875rem; min-width: 800px;">
                     <thead>
                         <tr style="background: #F9FAFB; border-bottom: 2px solid #E5E7EB;">
                             ${displayColumns.map(col => {
@@ -2301,18 +2301,18 @@
     // Cancel training function - cancels all training and closes modal
     window.cancelTraining = function () {
         console.log('Cancel training button clicked');
-        
+
         // Confirm with user
         const confirmed = confirm('Are you sure you want to cancel training? All progress will be lost.');
         if (!confirmed) {
             return;
         }
-        
+
         console.log('Cancelling all training...');
-        
+
         // Set cancellation flag so training loop knows to stop
         window.trainingCancelled = true;
-        
+
         // Abort all active fetch requests
         if (window.trainingAbortControllers) {
             Object.keys(window.trainingAbortControllers).forEach(modelId => {
@@ -2326,7 +2326,7 @@
                 }
             });
         }
-        
+
         // Clear all progress intervals
         if (window.trainingProgressIntervals) {
             Object.keys(window.trainingProgressIntervals).forEach(modelId => {
@@ -2339,12 +2339,12 @@
                 }
             });
         }
-        
+
         // Clear auto interval if exists
         if (window.trainingProgressState && window.trainingProgressState.autoInterval) {
             clearInterval(window.trainingProgressState.autoInterval);
         }
-        
+
         // Update all pending/training models to "Cancelled" status
         if (window.trainingProgressState && window.trainingProgressState.selectedModels) {
             window.trainingProgressState.selectedModels.forEach(modelId => {
@@ -2355,24 +2355,24 @@
                 }
             });
         }
-        
+
         // Close the modal after a short delay
         setTimeout(() => {
             window.closeTrainingProgressModal();
-            
+
             // Re-enable the training button
             const trainingBtn = document.querySelector('button[onclick*="proceedToActualTraining"]');
             if (trainingBtn) {
                 trainingBtn.disabled = false;
                 trainingBtn.textContent = 'Start Training';
             }
-            
+
             // Clear all training state
             window.trainingAbortControllers = {};
             window.trainingProgressIntervals = {};
             window.trainingProgressState = null;
             window.trainingCancelled = false;
-            
+
             console.log('Training cancelled and modal closed');
         }, 1000);
     };
@@ -2383,7 +2383,7 @@
         window.trainingAbortControllers = {};
         window.trainingProgressIntervals = {};
         window.trainingCancelled = false; // Reset cancellation flag
-        
+
         if (!window.trainingDatasetExport) {
             alert('Please create the training dataset first by clicking "Create Training Dataset".');
             return;
@@ -2447,7 +2447,7 @@
         if (window.trainingProgressState && window.trainingProgressState.autoInterval) {
             clearInterval(window.trainingProgressState.autoInterval);
         }
-        
+
         // Get Optuna settings for ETA calculation
         const useOptunaCheckbox = document.getElementById('useOptunaCheckbox');
         const nTrialsInput = document.getElementById('nTrialsInput');
@@ -2584,7 +2584,7 @@
                     console.log('Training was cancelled, stopping loop');
                     break;
                 }
-                
+
                 const modelId = selectedModels[i];
 
                 // Update the current model status
@@ -2928,8 +2928,8 @@
             `;
             result.saved_models.forEach(sm => {
                 const modelName = MODEL_OPTIONS.ehr.classification.find(m => m.id === sm.model_id)?.name ||
-                                 MODEL_OPTIONS.ehr.regression.find(m => m.id === sm.model_id)?.name ||
-                                 sm.model_id.toUpperCase();
+                    MODEL_OPTIONS.ehr.regression.find(m => m.id === sm.model_id)?.name ||
+                    sm.model_id.toUpperCase();
                 resultsHTML += `
                     <a href="${window.API_BASE_URL || ""}/api/download-model/${sm.filename}" 
                        download="${sm.filename}"
@@ -3157,13 +3157,13 @@
             const trainSize = modelResult.train_size || result.train_size || 0;
             const testSize = modelResult.test_size || result.test_size || 0;
             const featureCount = modelResult.feature_count || result.feature_count || 0;
-            
+
             resultsHTML += `
                     <div style="margin-top: 12px; font-size: 0.85rem; color: #6B7280;">
                         Train Size: ${trainSize} | Test Size: ${testSize} | Features: ${featureCount}
                     </div>
             `;
-            
+
             // Display model parameters (state dict)
             if (modelResult.model_params && Object.keys(modelResult.model_params).length > 0) {
                 const paramsId = `model-params-${modelId}-${Date.now()}`;
@@ -3182,7 +3182,7 @@
                     </div>
                 `;
             }
-            
+
             resultsHTML += `</div>`;
         });
 
@@ -3192,7 +3192,7 @@
     };
 
     // Toggle model parameters display
-    window.toggleModelParams = function(paramsId) {
+    window.toggleModelParams = function (paramsId) {
         const paramsDiv = document.getElementById(paramsId);
         const icon = document.getElementById(paramsId + '-icon');
         if (paramsDiv && icon) {
