@@ -77,9 +77,15 @@ app.add_middleware(
 )
 
 # Mount static files for frontend
-frontend_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "frontend")
-if os.path.exists(frontend_dir):
+# Get the project root directory (one level up from backend)
+project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+frontend_dir = os.path.join(project_root, "frontend")
+index_file = os.path.join(project_root, "index.html")
+
+# Mount static directories
+if os.path.exists(os.path.join(frontend_dir, "css")):
     app.mount("/css", StaticFiles(directory=os.path.join(frontend_dir, "css")), name="css")
+if os.path.exists(os.path.join(frontend_dir, "js")):
     app.mount("/js", StaticFiles(directory=os.path.join(frontend_dir, "js")), name="js")
 
 # Storage for uploaded files
@@ -140,9 +146,8 @@ def detect_data_type(extension: str, content: bytes) -> str:
 @app.get("/")
 async def root():
     """Serve the frontend index.html"""
-    index_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "index.html")
-    if os.path.exists(index_path):
-        return FileResponse(index_path)
+    if os.path.exists(index_file):
+        return FileResponse(index_file)
     return {"message": "ResearcherML API", "status": "running"}
 
 
