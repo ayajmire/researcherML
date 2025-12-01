@@ -1,0 +1,19 @@
+{
+    "name": "researcher-ml-backend",
+    "version": "1.0.0",
+    "description": "ResearcherML Backend API",
+    "main": "main.py",
+    "scripts": {
+        "start": "python3 main.py",
+        "dev": "uvicorn main:app --reload --host 0.0.0.0 --port 8000",
+        "install": "pip install -r ../requirements.txt"
+    },
+    "keywords": [
+        "medical",
+        "ml",
+        "api",
+        "fastapi"
+    ],
+    "author": "ResearcherML Team",
+    "license": "MIT"
+}

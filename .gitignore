@@ -1,0 +1,47 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+*.egg-info/
+dist/
+build/
+
+# Node
+node_modules/
+package-lock.json
+
+# Uploads and Data
+uploads/
+backend/uploads/
+backend/backend/uploads/
+
+# Models
+saved_models/
+backend/saved_models/
+*.pkl
+*.joblib
+*.h5
+*.pth
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Screenshots and documentation images (but keep screenshots dir)
+!screenshots/*.png
+
