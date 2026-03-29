@@ -89,6 +89,4 @@ npm run install
 
 Want to deploy this app online for free? Check out the [Deployment Guide](DEPLOYMENT.md) for instructions on deploying to Render.com.
 
-## License
 
-MIT License
