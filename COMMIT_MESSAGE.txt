@@ -1,0 +1,27 @@
+Add Electron desktop app with GitHub Actions build workflow
+
+✨ New Features:
+- Complete Electron desktop application
+- GitHub Actions workflow for building Mac/Windows installers
+- Comprehensive documentation for development and distribution
+- Browser-based development mode as fallback
+- Native Mac .app launcher
+
+📦 Build System:
+- Automated builds for macOS (.dmg)
+- Automated builds for Windows (.exe)
+- Support for Linux distributions
+- Private repository compatible
+
+📚 Documentation:
+- Complete setup and build guides
+- macOS Sequoia compatibility notes
+- Distribution strategies
+- Security best practices
+
+🔧 Development Tools:
+- Browser app mode launcher
+- Permission checker scripts
+- Automated deployment workflows
+
+Ready for production deployment and distribution!

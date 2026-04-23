@@ -5,12 +5,30 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ResearcherML - Machine Learning Research Platform</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Instrument+Serif:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/modern-theme.css">
     <link rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="/css/split-layout.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 
 <body>
-    <div class="app-layout">
+    <!-- Background elements -->
+    <div class="grid-bg"></div>
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    
+    <!-- Top Navigation -->
+    <nav class="top-nav">
+        <div class="app-logo">
+            <span class="logo-pip"></span>
+            ResearcherML
+        </div>
+        <span class="badge">Research Platform</span>
+    </nav>
+    <div class="app-container">
         <!-- Left Sidebar Navigation -->
         <aside class="sidebar-nav" id="workflowNav" role="navigation" aria-label="Main navigation">
             <div class="sidebar-header">
@@ -23,82 +41,125 @@
 
         <!-- Main Content Area -->
         <div class="main-content">
-            <div class="container">
-                <div class="header">
-                    <h1>ResearcherML</h1>
-                    <p>Machine Learning Research Platform</p>
-                </div>
+            <div class="section-container">
 
                 <div class="model-selection" id="modelSelection">
-                    <h3>Select Model Type</h3>
+                    <div class="section-header">
+                        <div class="section-label">Step 1</div>
+                        <h2 class="section-title">Select Model Type</h2>
+                        <p class="section-subtitle">Choose your data type to begin</p>
+                    </div>
+                    
                     <div class="model-options">
-                        <div class="model-option" data-type="ehr" onclick="selectModelType('ehr')">
-                            <h4>EHR / Tabular</h4>
-                            <p>Electronic Health Records & Tabular Data</p>
+                        <div class="card model-option" data-type="ehr" onclick="selectModelType('ehr')">
+                            <div class="card-header">EHR / Tabular</div>
+                            <div class="card-body">Electronic Health Records & Tabular Data</div>
                         </div>
                     </div>
 
-                    <h3 style="margin-top: 30px;">Select Model Action</h3>
+                    <div class="section-header" style="margin-top: 60px;">
+                        <div class="section-label">Step 2</div>
+                        <h2 class="section-title">Select Model Action</h2>
+                        <p class="section-subtitle">Choose your prediction task</p>
+                    </div>
+                    
                     <div class="model-options">
-                        <div class="model-option" data-action="classification"
+                        <div class="card model-option" data-action="classification"
                             onclick="selectModelAction('classification')">
-                            <h4>Classification</h4>
-                            <p>Predict categories or classes</p>
+                            <div class="card-header">Classification</div>
+                            <div class="card-body">Predict categories or classes</div>
                         </div>
-                        <div class="model-option" data-action="regression" onclick="selectModelAction('regression')">
-                            <h4>Regression</h4>
-                            <p>Predict continuous values</p>
+                        <div class="card model-option" data-action="regression" onclick="selectModelAction('regression')">
+                            <div class="card-header">Regression</div>
+                            <div class="card-body">Predict continuous values</div>
                         </div>
                     </div>
                 </div>
 
                 <div class="upload-section" id="uploadSection">
-                    <div class="upload-box" id="uploadBox">
-                        <div class="upload-icon"></div>
+                    <div class="section-header">
+                        <div class="section-label">Step 3</div>
+                        <h2 class="section-title">Upload Your Data</h2>
+                        <p class="section-subtitle">Drop your file or click to browse</p>
+                    </div>
+                    
+                    <div class="upload-zone" id="uploadBox">
+                        <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
+                        </svg>
                         <div class="upload-text">Drop your file here</div>
-                        <div class="upload-subtext" id="uploadSubtext">or click to browse (single file only)</div>
-                        <button class="browse-btn" onclick="window.openFilePicker()">
+                        <div class="upload-hint" id="uploadSubtext">or click to browse (single file only)</div>
+                        <button class="btn btn-primary" style="margin-top: 20px;" onclick="window.openFilePicker()">
                             Browse File
                         </button>
-                        <input type="file" id="fileInput" class="file-input" accept=".csv,.tsv,.txt,.json">
+                        <input type="file" id="fileInput" class="file-input" accept=".csv,.tsv,.txt,.json" style="display: none;">
                     </div>
 
                     <div class="file-list" id="fileList"></div>
 
-                    <div class="supported-formats">
-                        <h4>Supported Formats:</h4>
-                        <div class="formats-list">
-                            <span class="format-tag">CSV/TSV</span>
-                            <span class="format-tag">TXT/JSON</span>
+                    <div class="supported-formats" style="margin-top: 32px;">
+                        <div class="section-label" style="margin-bottom: 16px;">Supported Formats</div>
+                        <div class="formats-list" style="display: flex; gap: 12px;">
+                            <span class="status-chip info">
+                                <span class="status-dot"></span>
+                                CSV/TSV
+                            </span>
+                            <span class="status-chip info">
+                                <span class="status-dot"></span>
+                                TXT/JSON
+                            </span>
                         </div>
                     </div>
                 </div>
 
-                <button class="upload-btn" id="uploadBtn" onclick="uploadFiles()" disabled
-                    style="display: none; visibility: hidden;">
+                <button class="btn btn-primary upload-btn" id="uploadBtn" onclick="uploadFiles()" disabled
+                    style="display: none; visibility: hidden; margin-top: 24px;">
                     Upload & Process File
                 </button>
 
-                <button class="upload-btn" id="newUploadBtn" onclick="handleNewUploadClick(event)"
-                    style="display: none; visibility: hidden; background: #0071e3; margin-top: 15px;">
+                <button class="btn btn-secondary upload-btn" id="newUploadBtn" onclick="handleNewUploadClick(event)"
+                    style="display: none; visibility: hidden; margin-top: 15px;">
                     Upload New File
                 </button>
 
-                <div class="loading" id="loading">
-                    <div class="spinner"></div>
-                    <div>Processing your file...</div>
+                <div class="loading" id="loading" style="display: none; text-align: center; padding: 60px 0;">
+                    <div class="loading-spinner" style="margin: 0 auto 20px;"></div>
+                    <div style="font-family: var(--font-mono); font-size: 0.85rem; color: var(--muted2); letter-spacing: 0.04em;">
+                        Processing your file...
+                    </div>
                 </div>
 
                 <div class="result" id="result"></div>
 
-                <div class="data-viewer" id="dataViewer">
-                    <h3>Dataset Viewer</h3>
-                    <div id="viewerContent"></div>
+                <div class="data-viewer" id="dataViewer" style="display: none;">
+                    <div class="section-header">
+                        <div class="section-label">Dataset Preview</div>
+                        <h2 class="section-title">Dataset Viewer</h2>
+                    </div>
+                    <div class="data-table-container">
+                        <div id="viewerContent"></div>
+                    </div>
                 </div>
 
                 <div class="data-viewer" id="cleaningPage" style="display: none;">
                     <h3>Data Cleaning & Preprocessing</h3>
                     <div id="cleaningContent"></div>
+                </div>
+
+                <!-- Questionnaire-Driven Cleaning -->
+                <div id="questionnaireCleanPage" style="display: none;">
+                    <div class="split-container" id="splitContainer">
+                        <div class="split-panel split-panel-left" id="questionPanel">
+                            <div id="questionContent"></div>
+                            <div class="column-minimap" id="columnMiniMap"></div>
+                        </div>
+                        
+                        <div class="split-divider" id="splitDivider"></div>
+                        
+                        <div class="split-panel split-panel-right" id="vizPanel">
+                            <div class="viz-panel" id="vizContent"></div>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="data-viewer" id="featureEngineeringPage" style="display: none;">
@@ -4594,13 +4655,16 @@ Excluded values will be removed from the dataset.
     </script>
 
     <!-- Modular JavaScript Files -->
-    <!-- Load order matters: config first, then utils, data manager, then feature modules -->
+    <!-- Load order matters: core modules first (app-store, navigation), then config, then utils, data manager, then feature modules -->
+    <script src="/js/app-store.js"></script>
+    <script src="/js/navigation.js"></script>
     <script src="/js/config.js"></script>
     <script src="/js/utils.js"></script>
     <script src="/js/dataManager.js"></script>
     <script src="/js/upload.js?v=3.0"></script>
     <script src="/js/dataViewer.js?v=2.6"></script>
     <script src="/js/dataCleaning.js?v=2.7"></script>
+    <script src="/js/questionnaireClean.js"></script>
     <script src="/js/featureEngineering.js?v=2.5"></script>
     <script src="/js/visualization.js"></script>
     <script src="/js/modelTraining.js?v=3.2"></script>

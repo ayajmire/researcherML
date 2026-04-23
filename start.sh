@@ -36,8 +36,7 @@ mkdir -p backend/uploads
 
 # Start backend server
 echo "🚀 Starting backend server..."
-cd backend
-python3 main.py &
+cd backend && python3 main.py &
 BACKEND_PID=$!
 cd ..
 

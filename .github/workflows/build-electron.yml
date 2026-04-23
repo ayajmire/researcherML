@@ -1,0 +1,74 @@
+name: Build Electron App
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  build-mac:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          
+      - name: Install Python dependencies
+        run: |
+          cd backend
+          pip install -r requirements.txt
+          
+      - name: Install Node dependencies
+        run: npm install
+        
+      - name: Build Mac App
+        run: npm run build:mac
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          
+      - name: Upload Mac DMG
+        uses: actions/upload-artifact@v3
+        with:
+          name: ResearcherML-mac
+          path: dist/*.dmg
+          
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          
+      - name: Install Python dependencies
+        run: |
+          cd backend
+          pip install -r requirements.txt
+          
+      - name: Install Node dependencies
+        run: npm install
+        
+      - name: Build Windows App
+        run: npm run build:win
+        
+      - name: Upload Windows Installer
+        uses: actions/upload-artifact@v3
+        with:
+          name: ResearcherML-windows
+          path: dist/*.exe

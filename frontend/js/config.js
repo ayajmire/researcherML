@@ -4,9 +4,19 @@
 (function () {
     'use strict';
 
-    // API Configuration - automatically use current domain
-    window.API_BASE_URL = window.location.origin;
-    console.log('API Base URL:', window.API_BASE_URL);
+    // API Configuration - detect Electron environment
+    if (window.electronAPI) {
+        // Running in Electron - backend runs on fixed port (use IPv4)
+        window.electronAPI.getBackendUrl().then(url => {
+            window.API_BASE_URL = url;
+            console.log('API Base URL (Electron):', window.API_BASE_URL);
+        });
+        window.API_BASE_URL = 'http://127.0.0.1:8000'; // Default until promise resolves (IPv4)
+    } else {
+        // Running in browser - use current domain
+        window.API_BASE_URL = window.location.origin;
+        console.log('API Base URL (Browser):', window.API_BASE_URL);
+    }
 
     // Global state variables
     window.selectedFiles = [];

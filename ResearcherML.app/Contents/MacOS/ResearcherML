@@ -1,0 +1,39 @@
+#!/bin/bash
+
+# Get the directory where the app is located
+APP_DIR="$(cd "$(dirname "$0")/../../.." && pwd)"
+PROJECT_DIR="$APP_DIR/../researcherML"
+
+# If the project directory doesn't exist, try to find it
+if [ ! -d "$PROJECT_DIR" ]; then
+    PROJECT_DIR="/Users/ayajmire/Downloads/researcherML"
+fi
+
+cd "$PROJECT_DIR" || exit 1
+
+# Check if backend is already running
+if ! curl -s http://localhost:8000 > /dev/null 2>&1; then
+    # Start backend
+    cd backend
+    python3 main.py > /tmp/researcherml-backend.log 2>&1 &
+    BACKEND_PID=$!
+    echo $BACKEND_PID > /tmp/researcherml-backend.pid
+    cd ..
+    
+    # Wait for backend
+    for i in {1..10}; do
+        if curl -s http://localhost:8000 > /dev/null 2>&1; then
+            break
+        fi
+        sleep 1
+    done
+fi
+
+# Open in Chrome app mode
+if [ -d "/Applications/Google Chrome.app" ]; then
+    open -na "Google Chrome" --args --app=http://localhost:8000 --new-window
+elif [ -d "/Applications/Brave Browser.app" ]; then
+    open -na "Brave Browser" --args --app=http://localhost:8000 --new-window
+else
+    open -a Safari http://localhost:8000
+fi

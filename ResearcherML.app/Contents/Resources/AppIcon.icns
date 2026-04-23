@@ -1,0 +1,4 @@
+# Placeholder icon file
+# To add a real icon:
+# 1. Create icon.png (1024x1024)
+# 2. Use: iconutil -c icns icon.iconset -o AppIcon.icns

@@ -1,103 +1,51 @@
+/* Modern Theme Compatibility Layer */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
+/* Override with modern dark theme (from modern-theme.css) */
 body {
-    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-    background: #ffffff;
-    min-height: 100vh;
-    color: #1d1d1f;
-    line-height: 1.6;
+    /* Inherited from modern-theme.css */
 }
 
+/* Main containers now use section-container from modern-theme.css */
 .container {
-    background: transparent;
-    max-width: 1280px;
-    width: 100%;
-    margin: 0 auto;
-    padding: 0;
+    /* Inherited from modern-theme.css section-container */
 }
 
 .header {
-    text-align: center;
-    padding: 40px 40px 20px;
-    background: linear-gradient(180deg, #f5f5f7 0%, #ffffff 100%);
-    margin-left: 0;
+    /* Removed - using section-header from modern-theme.css instead */
+    display: none;
 }
 
-.header h1 {
-    color: #1d1d1f;
-    font-size: 3.5rem;
-    margin-bottom: 12px;
-    font-weight: 700;
-    letter-spacing: -0.04em;
-}
-
+.header h1,
 .header p {
-    color: #86868b;
-    font-size: 1.125rem;
-    font-weight: 400;
-    letter-spacing: -0.01em;
+    /* Inherited from modern-theme.css */
 }
 
 .upload-section {
-    padding: 40px;
+    /* Inherited from modern-theme.css */
 }
 
+/* upload-box, upload-icon, upload-text, upload-hint now use upload-zone styles from modern-theme.css */
 .upload-box {
-    border: 2px dashed #d2d2d7;
-    border-radius: 20px;
-    padding: 80px 40px;
-    text-align: center;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    cursor: pointer;
-    background: linear-gradient(135deg, #fafafa 0%, #ffffff 100%);
-    position: relative;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-}
-
-.upload-box:hover {
-    border-color: #0071e3;
-    background: linear-gradient(135deg, #f5f5f7 0%, #fafafa 100%);
-    box-shadow: 0 4px 16px rgba(0, 113, 227, 0.12);
-    transform: translateY(-2px);
-}
-
-.upload-box.dragover {
-    border-color: #0071e3;
-    background: linear-gradient(135deg, #e8f0fe 0%, #f0f7ff 100%);
-    border-width: 3px;
-    box-shadow: 0 6px 24px rgba(0, 113, 227, 0.2);
+    /* Inherited from modern-theme.css .upload-zone */
 }
 
 .upload-icon {
-    font-size: 3.5rem;
-    color: #86868b;
-    margin-bottom: 24px;
-    opacity: 0.6;
-    transition: all 0.3s ease;
-    font-weight: 300;
-    line-height: 1;
-}
-
-.upload-box:hover .upload-icon {
-    opacity: 1;
-    color: #0071e3;
-    transform: translateY(-4px);
+    /* Inherited from modern-theme.css */
 }
 
 .upload-text {
-    color: #1d1d1f;
-    font-size: 1.5rem;
-    margin-bottom: 12px;
-    font-weight: 600;
-    letter-spacing: -0.02em;
+    /* Inherited from modern-theme.css */
 }
 
-.upload-subtext {
-    color: #86868b;
+.upload-subtext,
+.upload-hint {
+    /* Inherited from modern-theme.css */
+    color: var(--muted);
     font-size: 1rem;
     font-weight: 400;
     margin-bottom: 32px;
@@ -192,43 +140,33 @@ body {
 }
 
 .model-selection {
-    margin-top: 40px;
-    padding: 0 40px;
+    margin-top: 60px;
 }
 
 .model-selection h3 {
-    color: #1d1d1f;
-    margin-bottom: 20px;
-    font-size: 1.5rem;
-    font-weight: 600;
-    letter-spacing: -0.02em;
+    /* Using section-title from modern-theme.css */
+    display: none;
 }
 
 .model-options {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 16px;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
 }
 
 .model-option {
-    padding: 24px 20px;
-    border: 2px solid #d2d2d7;
-    border-radius: 14px;
+    /* Now uses .card from modern-theme.css */
     text-align: center;
     cursor: pointer;
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    background: #fbfbfd;
 }
 
 .model-option:hover {
-    border-color: #0071e3;
-    background: #f5f5f7;
-    transform: translateY(-2px);
+    /* Inherited from .card:hover */
 }
 
 .model-option.selected {
-    border-color: #0071e3;
-    background: #e8f0fe;
+    border-color: var(--accent);
+    background: var(--accent-dim);
 }
 
 .model-option h4 {
@@ -519,40 +457,36 @@ body {
     border: 1px solid #d2d2d7;
 }
 
-/* App Layout with Sidebar */
-.app-layout {
+/* App Layout with Sidebar and Top Nav */
+.app-container {
     display: flex;
     min-height: 100vh;
     width: 100%;
 }
 
-/* HIDE ANY TOP NAVIGATION BARS - ONLY LEFT SIDEBAR ALLOWED */
-/* The sidebar is .sidebar-nav and .sidebar-menu, everything else nav-related at top should be hidden */
-body>nav:not(.sidebar-nav),
-body>.nav:not(.sidebar-nav),
-header nav,
-.header nav {
-    display: none !important;
-    visibility: hidden !important;
+/* Keep the top-nav visible (from modern-theme.css) */
+.top-nav {
+    /* Inherited from modern-theme.css */
 }
 
 .main-content {
     flex: 1;
     margin-left: 260px;
     min-height: 100vh;
-    background: #ffffff;
+    background: var(--bg);
+    padding-top: 0;
 }
 
-/* Left Sidebar Navigation */
+/* Left Sidebar Navigation - Modern Theme */
 .sidebar-nav {
     position: fixed !important;
     left: 0 !important;
-    top: 0 !important;
+    top: 70px !important;
     width: 260px !important;
-    height: 100vh !important;
-    background: #1f2937 !important;
-    border-right: 1px solid #374151 !important;
-    z-index: 9999 !important;
+    height: calc(100vh - 70px) !important;
+    background: var(--surface) !important;
+    border-right: 1px solid var(--border) !important;
+    z-index: 90 !important;
     overflow-y: auto;
     display: flex !important;
     flex-direction: column;
@@ -562,14 +496,16 @@ header nav,
 
 .sidebar-header {
     padding: 24px 20px;
-    border-bottom: 1px solid #374151;
+    border-bottom: 1px solid var(--border);
 }
 
 .sidebar-header h2 {
-    color: #ffffff;
-    font-size: 1.25rem;
-    font-weight: 700;
+    font-family: var(--font-serif);
+    color: var(--text);
+    font-size: 1.3rem;
+    font-weight: 400;
     margin: 0;
+    letter-spacing: -0.02em;
 }
 
 .sidebar-menu {
@@ -584,34 +520,35 @@ header nav,
     gap: 12px;
     padding: 14px 20px;
     background: transparent;
-    color: #e5e7eb;
+    color: var(--muted2);
     border: none;
     border-left: 3px solid transparent;
-    font-size: 0.9rem;
-    font-weight: 500;
+    font-family: var(--font-sans);
+    font-size: 0.88rem;
+    font-weight: 400;
     cursor: pointer;
     transition: all 0.2s ease;
     text-align: left;
 }
 
 .sidebar-nav .nav-item:hover:not(.active):not(:disabled) {
-    background: rgba(59, 130, 246, 0.1);
-    color: #ffffff;
-    border-left-color: rgba(59, 130, 246, 0.5);
+    background: rgba(125,211,252,0.08);
+    color: var(--text);
+    border-left-color: rgba(125,211,252,0.4);
 }
 
 .sidebar-nav .nav-item.active {
-    background: rgba(59, 130, 246, 0.2);
-    color: #ffffff;
-    border-left-color: #3b82f6;
-    font-weight: 600;
+    background: var(--accent-dim);
+    color: var(--accent);
+    border-left-color: var(--accent);
+    font-weight: 500;
 }
 
 .sidebar-nav .nav-item:disabled,
 .sidebar-nav .nav-item.disabled {
     cursor: not-allowed !important;
-    opacity: 0.4 !important;
-    color: #6b7280 !important;
+    opacity: 0.3 !important;
+    color: var(--muted) !important;
     background: transparent !important;
     pointer-events: none !important;
 }

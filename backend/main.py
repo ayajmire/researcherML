@@ -14,10 +14,12 @@ import base64
 import io
 import zipfile
 from fastapi import Path
+from session_store import save_session, load_session, delete_session
+from questionnaire_handler import analyze_column, apply_cleaning_transformation, get_cleaning_summary
 
 # Import time series utilities
 try:
-    from backend.time_series_utils import (
+    from time_series_utils import (
         analyze_time_series,
         detect_frequency,
         downsample_time_series,
@@ -46,7 +48,7 @@ except ImportError:
 
 # Import JSON utilities
 try:
-    from backend.json_utils import parse_json_to_dataframe, detect_json_structure
+    from json_utils import parse_json_to_dataframe, detect_json_structure
 except ImportError:
     print("Warning: json_utils not available, using stubs")
 
@@ -68,9 +70,11 @@ app = FastAPI(title="ResearcherML API",
               description="Machine Learning Research Platform")
 
 # Enable CORS for frontend
+# Use environment variable for allowed origins, default to localhost for development
+ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000,http://127.0.0.1:3000").split(",")
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In production, specify exact origins
+    allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -90,8 +94,24 @@ if os.path.exists(os.path.join(frontend_dir, "js")):
     app.mount(
         "/js", StaticFiles(directory=os.path.join(frontend_dir, "js")), name="js")
 
-# Storage for uploaded files
-uploaded_data_store = {}
+# Storage for uploaded files - now using persistent session store
+# Keep in-memory cache for frequently accessed data
+uploaded_data_cache = {}
+
+def get_file_data(file_id: str) -> Optional[Dict]:
+    """Get file data from cache or load from session store"""
+    if file_id in uploaded_data_cache:
+        return uploaded_data_cache[file_id]
+    
+    data = load_session(file_id)
+    if data:
+        uploaded_data_cache[file_id] = data
+    return data
+
+def store_file_data(file_id: str, data: Dict) -> None:
+    """Store file data in both cache and persistent storage"""
+    uploaded_data_cache[file_id] = data
+    save_session(file_id, data)
 
 # Models directory
 MODELS_DIR = "backend/models"
@@ -213,9 +233,9 @@ async def upload_files(
             print(f"⚠️ Error detecting data type: {str(e)}")
             detected_types.append('unknown')
 
-        # Store file data (fast - just stores in memory)
+        # Store file data (persistent storage + cache)
         try:
-            uploaded_data_store[file_id] = {
+            file_data = {
                 'filename': file.filename,
                 'extension': file_extension,
                 'content': content_str,
@@ -223,6 +243,7 @@ async def upload_files(
                 'detected_type': detected_type,
                 'uploaded_at': datetime.now().isoformat()
             }
+            store_file_data(file_id, file_data)
             print(f"✅ File stored with ID: {file_id}")
             file_ids.append(file_id)
         except Exception as e:
@@ -260,10 +281,9 @@ async def get_data_preview(file_id: str, full: bool = False):
     full: If True, return full dataset instead of preview
     """
     try:
-        if file_id not in uploaded_data_store:
+        file_data = get_file_data(file_id)
+        if not file_data:
             raise HTTPException(status_code=404, detail="File not found")
-
-        file_data = uploaded_data_store[file_id]
         file_extension = file_data.get('extension', '')
         content = file_data.get('content', '')
 
@@ -599,21 +619,26 @@ async def train_models(request: Request):
                     label_encoder = LabelEncoder()
                     y = label_encoder.fit_transform(y.astype(str))
 
-                # Ensure binary classification uses 0 and 1
+                # Ensure classification has proper label encoding
                 unique_labels = np.unique(y)
-                if len(unique_labels) < 2:
+                n_classes = len(unique_labels)
+                
+                if n_classes < 2:
                     raise ValueError(
-                        f"Classification requires at least 2 classes, but found {len(unique_labels)}: {unique_labels}. Please check your label column."
+                        f"Classification requires at least 2 classes, but found {n_classes}: {unique_labels}. Please check your label column."
                     )
+                
                 # Check that each class has at least 2 samples
                 label_counts = pd.Series(y).value_counts()
-                classes_with_insufficient_samples = label_counts[label_counts < 2].index.tolist(
-                )
+                classes_with_insufficient_samples = label_counts[label_counts < 2].index.tolist()
+                
                 if len(classes_with_insufficient_samples) > 0:
                     raise ValueError(
                         f"Classification requires at least 2 samples per class, but found classes with insufficient samples: {classes_with_insufficient_samples}. Please check your label distribution."
                     )
-                if len(unique_labels) == 2:
+                
+                # Only remap for binary classification - multi-class is already correctly encoded by LabelEncoder
+                if n_classes == 2:
                     y = np.where(y == unique_labels[0], 0, 1)
 
             # Validate that we have enough samples
@@ -730,8 +755,20 @@ async def train_models(request: Request):
                             'error': 'XGBoost not installed. Please install it with: pip install xgboost'
                         })
                         continue
-                    model = xgb.XGBClassifier(
-                        random_state=42, eval_metric='logloss')
+                    # Configure for binary or multi-class
+                    if n_classes > 2:
+                        model = xgb.XGBClassifier(
+                            random_state=42,
+                            eval_metric='mlogloss',
+                            objective='multi:softprob',
+                            num_class=n_classes
+                        )
+                    else:
+                        model = xgb.XGBClassifier(
+                            random_state=42,
+                            eval_metric='logloss',
+                            objective='binary:logistic'
+                        )
                 elif model_id == 'lgbm':
                     if lgb is None:
                         results.append({
@@ -753,7 +790,15 @@ async def train_models(request: Request):
                 elif model_id == 'adaboost':
                     model = AdaBoostClassifier(random_state=42)
                 elif model_id == 'svm':
-                    model = SVC(random_state=42, probability=True)
+                    # Configure for binary or multi-class
+                    if n_classes > 2:
+                        model = SVC(
+                            random_state=42,
+                            probability=True,
+                            decision_function_shape='ovr'  # one-vs-rest for multi-class
+                        )
+                    else:
+                        model = SVC(random_state=42, probability=True)
                 elif model_id == 'knn':
                     model = KNeighborsClassifier()
                 elif model_id == 'nb':
@@ -1042,7 +1087,14 @@ async def train_models(request: Request):
                 model.fit(X_train, y_train)
 
                 # Calculate metrics
-                from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, mean_squared_error, mean_absolute_error, r2_score
+                from sklearn.metrics import (
+                    accuracy_score, precision_score, recall_score, f1_score, 
+                    mean_squared_error, mean_absolute_error, r2_score,
+                    confusion_matrix, classification_report, ConfusionMatrixDisplay
+                )
+                import matplotlib
+                matplotlib.use('Agg')  # Non-interactive backend for server-side rendering
+                import matplotlib.pyplot as plt
 
                 y_train_pred = model.predict(X_train)
                 y_test_pred = model.predict(X_test)
@@ -1059,6 +1111,46 @@ async def train_models(request: Request):
                         y_test, y_test_pred, average='weighted', zero_division=0))
                     metrics['test_f1'] = float(
                         f1_score(y_test, y_test_pred, average='weighted', zero_division=0))
+                    
+                    # Generate confusion matrix
+                    try:
+                        # Get class names (decode from label encoder if available)
+                        class_names = [str(int(c)) for c in unique_labels]
+                        
+                        cm = confusion_matrix(y_test, y_test_pred)
+                        fig, ax = plt.subplots(figsize=(max(6, n_classes), max(5, n_classes - 1)))
+                        disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=class_names)
+                        disp.plot(ax=ax, colorbar=False, cmap='Blues')
+                        ax.set_title('Confusion Matrix', fontsize=14, pad=12)
+                        plt.tight_layout()
+                        
+                        # Convert to base64
+                        buf = io.BytesIO()
+                        plt.savefig(buf, format='png', dpi=120, bbox_inches='tight')
+                        plt.close(fig)
+                        buf.seek(0)
+                        metrics['confusion_matrix_image'] = base64.b64encode(buf.read()).decode('utf-8')
+                        
+                        # Add per-class metrics for multi-class
+                        if n_classes > 2:
+                            report = classification_report(
+                                y_test, y_test_pred,
+                                target_names=class_names,
+                                output_dict=True,
+                                zero_division=0
+                            )
+                            metrics['per_class'] = {
+                                cls: {
+                                    'precision': report[cls]['precision'],
+                                    'recall': report[cls]['recall'],
+                                    'f1': report[cls]['f1-score'],
+                                    'support': report[cls]['support']
+                                }
+                                for cls in class_names
+                            }
+                    except Exception as e:
+                        print(f"Warning: Could not generate confusion matrix: {e}")
+                        metrics['confusion_matrix_image'] = None
                 else:
                     metrics['train_mse'] = float(
                         mean_squared_error(y_train, y_train_pred))
@@ -1219,10 +1311,9 @@ async def resample_time_series(request: Request):
         original_frequency = body.get('original_frequency')
         method = body.get('method', 'average')
 
-        if not file_id or file_id not in uploaded_data_store:
+        file_data = get_file_data(file_id)
+        if not file_data:
             raise HTTPException(status_code=404, detail="File not found")
-
-        file_data = uploaded_data_store[file_id]
         content = file_data.get('content', '')
         file_extension = file_data.get('extension', '')
 
@@ -1265,6 +1356,146 @@ async def resample_time_series(request: Request):
     except Exception as e:
         raise HTTPException(
             status_code=500, detail=f"Error resampling time series: {str(e)}")
+
+
+@app.get("/api/questionnaire/column/{file_id}/{column_name}")
+async def get_column_context(file_id: str, column_name: str):
+    """
+    Get context and analysis for a specific column for questionnaire.
+    """
+    try:
+        file_data = get_file_data(file_id)
+        if not file_data:
+            raise HTTPException(status_code=404, detail="File not found")
+        
+        content = file_data.get('content', '')
+        file_extension = file_data.get('extension', '')
+        
+        # Parse data
+        if file_extension == '.json':
+            df = parse_json_to_dataframe(content)
+        else:
+            df = pd.read_csv(io.StringIO(content))
+        
+        # Analyze column
+        analysis = analyze_column(df, column_name)
+        
+        return {
+            "success": True,
+            "analysis": analysis
+        }
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error analyzing column: {str(e)}")
+
+
+@app.post("/api/questionnaire/apply")
+async def apply_questionnaire_cleaning(request: Request):
+    """
+    Apply cleaning transformation based on questionnaire answers.
+    """
+    try:
+        body = await request.json()
+        file_id = body.get('file_id')
+        column_name = body.get('column_name')
+        answers = body.get('answers', {})
+        branch = body.get('branch', 'unknown')
+        
+        file_data = get_file_data(file_id)
+        if not file_data:
+            raise HTTPException(status_code=404, detail="File not found")
+        
+        content = file_data.get('content', '')
+        file_extension = file_data.get('extension', '')
+        
+        # Parse data
+        if file_extension == '.json':
+            df = parse_json_to_dataframe(content)
+        else:
+            df = pd.read_csv(io.StringIO(content))
+        
+        # Apply transformation
+        df_cleaned, transformation_summary = apply_cleaning_transformation(
+            df, column_name, answers, branch
+        )
+        
+        # Store cleaned data back to session
+        # Update the content with cleaned data
+        cleaned_content = df_cleaned.to_csv(index=False)
+        file_data['content'] = cleaned_content
+        file_data['last_cleaned'] = datetime.now().isoformat()
+        store_file_data(file_id, file_data)
+        
+        # Return preview
+        preview_data = df_cleaned.head(10).to_dict('records')
+        
+        return {
+            "success": True,
+            "transformation_summary": transformation_summary,
+            "preview": preview_data,
+            "total_rows": len(df_cleaned),
+            "total_columns": len(df_cleaned.columns)
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error applying cleaning: {str(e)}")
+
+
+@app.get("/api/questionnaire/summary/{file_id}")
+async def get_questionnaire_summary(file_id: str):
+    """
+    Get summary of all cleaning transformations applied.
+    """
+    try:
+        file_data = get_file_data(file_id)
+        if not file_data:
+            raise HTTPException(status_code=404, detail="File not found")
+        
+        # Get stored transformations (we'll need to store these in session)
+        transformations = file_data.get('transformations', [])
+        
+        summary = get_cleaning_summary(transformations)
+        
+        return {
+            "success": True,
+            "summary": summary
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error getting summary: {str(e)}")
+
+
+@app.post("/api/questionnaire/finalize")
+async def finalize_questionnaire_cleaning(request: Request):
+    """
+    Finalize all cleaning and return the cleaned dataset.
+    """
+    try:
+        body = await request.json()
+        file_id = body.get('file_id')
+        
+        file_data = get_file_data(file_id)
+        if not file_data:
+            raise HTTPException(status_code=404, detail="File not found")
+        
+        content = file_data.get('content', '')
+        file_extension = file_data.get('extension', '')
+        
+        # Parse final cleaned data
+        if file_extension == '.json':
+            df = parse_json_to_dataframe(content)
+        else:
+            df = pd.read_csv(io.StringIO(content))
+        
+        return {
+            "success": True,
+            "file_id": file_id,
+            "data": df.to_dict('records'),
+            "columns": list(df.columns),
+            "shape": {"rows": len(df), "columns": len(df.columns)},
+            "preview": df.head(20).to_dict('records')
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error finalizing cleaning: {str(e)}")
 
 
 if __name__ == "__main__":

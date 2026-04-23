@@ -1,94 +1,221 @@
-# ResearcherML - Machine Learning Research Platform
+# ResearcherML - No-Code ML for Healthcare Researchers
 
-A fast, modern platform for data research and machine learning with a vanilla JavaScript frontend and Python FastAPI backend.
+> Train publication-ready machine learning models on your medical data. No coding required.
 
-![Homepage](screenshots/homepage.png)
+## 🎯 What is ResearcherML?
 
-## Quick Start
+ResearcherML is a desktop application that allows healthcare researchers to:
+- Upload messy medical datasets (CSV, JSON, Excel)
+- Clean data through conversational questions
+- Train 20+ ML models automatically
+- Download trained models for research
 
-### Option 1: Full Stack (Recommended)
+**No Python. No coding. No data science degree required.**
+
+## ✨ Key Features
+
+### 🗣️ Conversational Data Cleaning
+Instead of technical dropdowns and jargon, we ask plain-English questions:
+- "What does this column represent?"
+- "Are there values that look wrong?"
+- "What should happen to missing values?"
+
+### 📊 Live Visualizations
+Watch your data transform in real-time:
+- Histograms and bar charts update as you answer
+- Missing value indicators turn green when handled
+- Before/after comparisons at every step
+
+### 🤖 Automated ML
+- 20+ algorithms (Logistic Regression, Random Forest, XGBoost, Neural Networks, etc.)
+- Automatic hyperparameter tuning with Optuna
+- Confusion matrices and performance metrics
+- Multi-class classification support
+
+### 🔒 Privacy-First
+- Runs completely on your computer
+- No cloud uploads
+- No account required
+- HIPAA-friendly (all data stays local)
+
+## 📥 Installation
+
+### macOS
+1. Download `ResearcherML.dmg`
+2. Open the DMG file
+3. Drag ResearcherML to Applications
+4. Double-click to launch
+   - First time: Right-click → Open (to bypass Gatekeeper)
+
+### Windows
+1. Download `ResearcherML Setup.exe`
+2. Run the installer
+3. Follow the wizard
+4. Launch from Start Menu
+
+### Linux
+1. Download `ResearcherML.AppImage`
+2. Make executable: `chmod +x ResearcherML*.AppImage`
+3. Double-click to run
+
+## 🚀 Quick Start
+
+1. **Launch the app** - Double-click ResearcherML
+2. **Upload your data** - Drop a CSV file or click to browse
+3. **Answer questions** - Follow the guided cleaning flow
+4. **Train models** - Select algorithms and click Train
+5. **Download results** - Export trained models and metrics
+
+## 🎓 Built for Researchers
+
+### Inspired by Research
+This project is informed by UCLA/Zar Lab research (*"A benchmark for large language models in bioinformatics"*) which found:
+- GPT-4: 63% accuracy on UCI Heart Disease task
+- Proper ML pipeline: 96% accuracy
+- **Solution:** Guided interface that generates proper ML pipelines
+
+### Use Cases
+- Clinical outcome prediction
+- Disease classification
+- Risk stratification
+- Treatment response prediction
+- Biomarker discovery
+
+### Publications
+Trained models include:
+- Feature importance rankings
+- Confusion matrices
+- Performance metrics (accuracy, precision, recall, F1)
+- Ready for publication supplementary materials
+
+## 🛠️ For Developers
+
+### Prerequisites
+- Node.js 18+
+- Python 3.11+
+- npm
+
+### Setup
 ```bash
-npm start
-```
-This will start both backend and frontend servers.
-
-### Option 2: Backend Only
-```bash
-cd backend
-npm start
-```
-
-### Option 3: Manual Start
-```bash
-# Backend
-cd backend
-python3 main.py
-
-# Frontend (in another terminal)
-python3 -m http.server 3000
-```
-
-## Features
-
-- **Fast Upload**: Drag & drop or click to upload files
-- **Multiple Formats**: Supports CSV, TSV, TXT, JSON, Images, Audio files
-- **Smart Detection**: Automatically detects data type (EHR, Imaging, Time Series)
-- **Model Selection**: Choose from EHR, Imaging, or Time Series models
-- **Clean UI**: Modern, responsive interface built with vanilla JavaScript
-
-### Screenshots
-
-**Data Viewer & Cleaning**
-
-![Dataset Viewer](screenshots/dataset_viewer.png)
-![Data Cleaning](screenshots/dataset_cleaning.png)
-
-**Feature Engineering & Visualization**
-
-![Feature Engineering](screenshots/feature_eng.png)
-![Visualization](screenshots/visualization.png)
-
-**Model Training**
-
-![Model Training](screenshots/model_training1.png)
-
-## Supported File Types
-
-- **Data**: CSV, TSV, TXT, JSON
-- **Images**: JPG, PNG, GIF, BMP, TIFF, WebP
-- **Audio**: WAV, MP3, FLAC, M4A
-- **Folders**: Upload entire folders of images
-
-## API Endpoints
-
-- `GET /` - Health check
-- `POST /api/upload` - Upload files and detect data type
-- `GET /api/health` - API health status
-- `GET /docs` - Interactive API documentation
-
-## Development
-
-```bash
-# Backend development mode (auto-reload)
-cd backend
-npm run dev
+# Clone repository
+git clone <your-repo-url>
+cd researcherML
 
 # Install dependencies
-cd backend
-npm run install
+npm install
+cd backend && pip install -r requirements.txt && cd ..
+
+# Run in development mode
+npm run dev
 ```
 
-## Architecture
+### Build
+```bash
+# Build for your platform
+npm run build:mac      # macOS
+npm run build:win      # Windows
+npm run build:linux    # Linux
+npm run build:all      # All platforms
+```
 
-- **Frontend**: Vanilla JavaScript, HTML5, CSS3
-- **Backend**: Python 3, FastAPI, Pandas
-- **Storage**: Local file system
-- **Ports**: Frontend (3000), Backend (8000)
+### Project Structure
+```
+researcherML/
+├── electron/          # Desktop app
+├── backend/           # Python FastAPI server
+├── frontend/          # HTML/CSS/JavaScript
+├── assets/            # Icons
+└── docs/              # Documentation
+```
 
-## Deployment
+## 📚 Documentation
 
-Want to deploy this app online for free? Check out the [Deployment Guide](DEPLOYMENT.md) for instructions on deploying to Render.com.
+- [Complete Summary](COMPLETE_SUMMARY.md) - Overview of all features
+- [Questionnaire Feature](QUESTIONNAIRE_FEATURE_COMPLETE.md) - Detailed docs on cleaning interface
+- [Electron Build Guide](ELECTRON_BUILD.md) - Building and distributing
+- [Sprint 1 Fixes](SPRINT1_COMPLETE.md) - Bug fixes and improvements
 
-## License
+## 🧪 Testing
 
-MIT License
+### Manual Testing
+```bash
+npm run dev  # Launch in dev mode with DevTools
+```
+
+Test with sample medical datasets:
+- Upload CSV with mixed data types
+- Go through questionnaire flow
+- Train multiple models
+- Check results
+
+### Automated Testing
+```bash
+npm test  # Coming soon
+```
+
+## 🤝 Contributing
+
+We welcome contributions! Areas of focus:
+- UI/UX improvements
+- Additional ML algorithms
+- Better visualizations
+- Documentation
+- Bug fixes
+
+## 📄 License
+
+MIT License - See LICENSE file for details
+
+## 🙏 Acknowledgments
+
+- Healthcare researchers for feedback
+- Open source ML community (scikit-learn, XGBoost, etc.)
+
+## 📧 Contact
+
+- **Developer:** Aadi Ajmire
+- **Issues:** GitHub Issues
+- **Feedback:** [your-email]
+
+## 🗺️ Roadmap
+
+### Current Version (1.0.0)
+- ✅ Desktop application
+- ✅ Questionnaire-driven cleaning
+- ✅ 20+ ML algorithms
+- ✅ Multi-class classification
+- ✅ Session persistence
+
+### Coming Soon (1.1.0)
+- [ ] User authentication
+- [ ] Cloud sync
+- [ ] Auto-updates
+- [ ] Imaging models (CNN/ResNet)
+- [ ] Time series models (LSTM)
+
+### Future
+- [ ] Subscription tiers
+- [ ] Collaborative features
+- [ ] Model marketplace
+- [ ] Mobile app
+
+## 💡 Why ResearcherML?
+
+**The Problem:**
+Healthcare researchers have valuable data but lack data science skills. Existing tools are too technical (Python/R) or too limited (AutoML black boxes).
+
+**Our Solution:**
+A guided interface that teaches while it works. Researchers answer questions about their data, and we generate proper ML pipelines behind the scenes.
+
+**The Impact:**
+- Hours instead of weeks
+- No coding required
+- Publication-ready results
+- Proper ML best practices
+- Complete transparency
+
+---
+
+**Status:** ✅ MVP Complete - Ready for Beta Testing
+
+**Star this repo if ResearcherML helps your research!** ⭐

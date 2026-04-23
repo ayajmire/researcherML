@@ -1745,8 +1745,8 @@
                     '<span style="color: #9CA3AF; font-style: italic;">null</span>' :
                     String(value);
                 const isNumeric = typeof value === 'number' && !isNaN(value);
-                const cellStyle = isNumeric ? 
-                    'padding: 8px 12px; color: #1F2937; text-align: right; white-space: nowrap; max-width: 200px; overflow: hidden; text-overflow: ellipsis;' : 
+                const cellStyle = isNumeric ?
+                    'padding: 8px 12px; color: #1F2937; text-align: right; white-space: nowrap; max-width: 200px; overflow: hidden; text-overflow: ellipsis;' :
                     'padding: 8px 12px; color: #1F2937; white-space: nowrap; max-width: 250px; overflow: hidden; text-overflow: ellipsis;';
                 tableHTML += `<td style="${cellStyle}" title="${displayValue}">${displayValue}</td>`;
             });
