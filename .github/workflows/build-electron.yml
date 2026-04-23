@@ -36,7 +36,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           
       - name: Upload Mac DMG
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ResearcherML-mac
           path: dist/*.dmg
@@ -68,7 +68,7 @@ jobs:
         run: npm run build:win
         
       - name: Upload Windows Installer
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ResearcherML-windows
           path: dist/*.exe
