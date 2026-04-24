@@ -143,16 +143,16 @@
 
                 <!-- Questionnaire-Driven Cleaning -->
                 <div id="questionnaireCleanPage" style="display: none;">
-                    <div class="split-container" id="splitContainer">
-                        <div class="split-panel split-panel-left" id="questionPanel">
+                    <div class="split-container" id="splitContainer" style="display: flex !important; width: 100%; height: calc(100vh - 120px); gap: 0; position: relative; overflow: hidden;">
+                        <div class="split-panel split-panel-left" id="questionPanel" style="flex: 0 0 50%; overflow-y: auto; overflow-x: hidden; padding: 40px; background: var(--bg); border-right: 1px solid var(--border);">
                             <div id="questionContent"></div>
                             <div class="column-minimap" id="columnMiniMap"></div>
                         </div>
-                        
-                        <div class="split-divider" id="splitDivider"></div>
-                        
-                        <div class="split-panel split-panel-right" id="vizPanel">
-                            <div class="viz-panel" id="vizContent"></div>
+
+                        <div class="split-divider" id="splitDivider" style="width: 8px; background: var(--border); cursor: col-resize; position: relative; flex-shrink: 0;"></div>
+
+                        <div class="split-panel split-panel-right" id="vizPanel" style="flex: 0 0 50%; overflow-y: auto; background: var(--surface); position: relative;">
+                            <div class="viz-panel" id="vizContent" style="padding: 32px; height: 100%;"></div>
                         </div>
                     </div>
                 </div>
