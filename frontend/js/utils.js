@@ -596,11 +596,29 @@
                 }
                 break;
             case 'cleaning':
-                if (window.proceedToCleaning) {
-                    window.proceedToCleaning();
+                // Use questionnaire-driven cleaning instead of old cleaning interface
+                if (window.QuestionnaireClean && window.uploadedData && window.uploadedData.file_ids) {
+                    console.log('🎯 Starting questionnaire cleaning from sidebar');
+                    const fileId = window.uploadedData.file_ids[0];
+                    const columns = window.uploadedData.columns || window.allColumns;
+                    if (columns && columns.length > 0) {
+                        window.QuestionnaireClean.init(fileId, columns);
+                    } else {
+                        // Need to fetch columns first
+                        fetch(`http://localhost:8000/api/data/${fileId}`)
+                            .then(res => res.json())
+                            .then(data => {
+                                window.uploadedData.columns = data.columns;
+                                window.QuestionnaireClean.init(fileId, data.columns);
+                            })
+                            .catch(err => {
+                                console.error('Error fetching columns:', err);
+                                alert('Could not load data cleaning. Please try uploading your file again.');
+                            });
+                    }
                 } else {
-                    console.error('proceedToCleaning function not found');
-                    alert('Data cleaning is not available. Please upload a dataset first.');
+                    console.error('QuestionnaireClean not available or no data uploaded');
+                    alert('Please upload a dataset first.');
                 }
                 break;
             case 'engineering':
