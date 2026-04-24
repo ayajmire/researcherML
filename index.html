@@ -255,13 +255,26 @@
                     // Persist uploaded data to localStorage so it survives page refreshes
                     localStorage.setItem('uploadedData', JSON.stringify(data));
 
-                    // Show questionnaire for data cleaning
-                    if (window.QuestionnaireClean && data.file_ids && data.file_ids.length > 0 && data.columns) {
-                        console.log('🎯 Starting questionnaire cleaning with', data.columns.length, 'columns');
-                        window.QuestionnaireClean.init(data.file_ids[0], data.columns);
-                    } else {
-                        // Fallback to data viewer if questionnaire not available
-                        console.log('Questionnaire not available, showing data viewer');
+                    // Fetch full data to get columns, then start questionnaire
+                    console.log('📥 Fetching data to start questionnaire...');
+                    try {
+                        const fileId = data.file_ids[0];
+                        const dataResponse = await fetch(`http://localhost:8000/api/data/${fileId}`);
+                        const fullData = await dataResponse.json();
+                        
+                        if (window.QuestionnaireClean && fullData.columns && fullData.columns.length > 0) {
+                            console.log('🎯 Starting questionnaire cleaning with', fullData.columns.length, 'columns');
+                            // Add columns to uploadedData for later use
+                            uploadedData.columns = fullData.columns;
+                            uploadedData.data = fullData.data || fullData.preview_data;
+                            window.QuestionnaireClean.init(fileId, fullData.columns);
+                        } else {
+                            console.log('No columns found or questionnaire unavailable, showing data viewer');
+                            showDataViewer(data);
+                        }
+                    } catch (error) {
+                        console.error('Error fetching data for questionnaire:', error);
+                        // Fallback to data viewer
                         showDataViewer(data);
                     }
 

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Questionnaire</title>
+    <script>
+        // Quick test to see if QuestionnaireClean module loads
+        window.onload = function() {
+            console.log('=== Questionnaire Test ===');
+            console.log('QuestionnaireClean exists?', typeof window.QuestionnaireClean);
+            
+            if (window.QuestionnaireClean) {
+                console.log('✅ QuestionnaireClean module loaded!');
+                console.log('Available methods:', Object.keys(window.QuestionnaireClean));
+            } else {
+                console.error('❌ QuestionnaireClean NOT found!');
+            }
+        };
+    </script>
+    <script src="/js/navigation.js"></script>
+    <script src="/js/questionnaireClean.js"></script>
+</head>
+<body>
+    <h1>Questionnaire Test</h1>
+    <p>Open console (Cmd+Option+I) to see results</p>
+</body>
+</html>
