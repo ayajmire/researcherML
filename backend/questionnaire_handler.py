@@ -62,6 +62,10 @@ def analyze_column(df: pd.DataFrame, column_name: str) -> Dict[str, Any]:
         'type_details': type_details
     }
     
+    # Add value_counts for ALL types (needed for distribution charts)
+    value_counts = column.value_counts()
+    analysis['value_counts'] = {str(k): int(v) for k, v in value_counts.head(20).items()}
+    
     # Add type-specific metadata
     if detected_type == 'numeric':
         non_null_numeric = pd.to_numeric(column, errors='coerce').dropna()
@@ -81,9 +85,7 @@ def analyze_column(df: pd.DataFrame, column_name: str) -> Dict[str, Any]:
                     analysis['outlier_examples'] = outliers.head(5).tolist()
     
     elif detected_type in ['text', 'categorical']:
-        value_counts = column.value_counts()
         analysis['unique_values'] = value_counts.index.tolist()[:50]  # Limit to 50
-        analysis['value_counts'] = {str(k): int(v) for k, v in value_counts.head(20).items()}
         analysis['most_common'] = str(value_counts.index[0]) if len(value_counts) > 0 else None
         
     elif detected_type == 'date':
