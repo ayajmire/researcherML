@@ -670,7 +670,7 @@ const QuestionnaireClean = (function() {
     }
 
     /**
-     * Render visualization panel
+     * Render visualization panel with data table + chart
      */
     function renderVisualization() {
         const container = document.getElementById('vizContent');
@@ -713,17 +713,65 @@ const QuestionnaireClean = (function() {
             </div>
         ` : '';
         
+        // Data table showing actual column values (scrollable)
+        const dataTable = renderDataTable(data);
+        
         // Chart placeholder (will be enhanced with Chart.js)
         const chart = `
-            <div class="viz-canvas">
+            <div class="viz-canvas" style="margin-top: 24px;">
+                <h4 style="color: var(--text); margin-bottom: 12px; font-size: 0.9rem;">Distribution</h4>
                 <canvas id="vizChart" width="400" height="300"></canvas>
             </div>
         `;
         
-        container.innerHTML = header + missingIndicator + chart;
+        container.innerHTML = header + missingIndicator + dataTable + chart;
         
         // Render actual chart
         renderChart(data, answers);
+    }
+    
+    /**
+     * Render scrollable data table for current column
+     */
+    function renderDataTable(data) {
+        if (!data.sample_rows || data.sample_rows.length === 0) {
+            return '<div style="color: var(--muted); padding: 20px;">No data preview available</div>';
+        }
+        
+        const columnName = data.column_name;
+        
+        // Build table rows
+        const rows = data.sample_rows.map((row, idx) => {
+            const value = row[columnName];
+            const displayValue = value === null || value === undefined || value === '' ? 
+                '<span style="color: #f59e0b; font-style: italic;">missing</span>' : 
+                String(value);
+            return `
+                <tr>
+                    <td style="color: var(--muted); font-size: 0.75rem;">${idx + 1}</td>
+                    <td style="color: var(--text); font-family: var(--font-mono); font-size: 0.85rem;">${displayValue}</td>
+                </tr>
+            `;
+        }).join('');
+        
+        return `
+            <div style="margin-top: 24px;">
+                <h4 style="color: var(--text); margin-bottom: 12px; font-size: 0.9rem;">Data Preview (${data.sample_rows.length} rows)</h4>
+                <div style="max-height: 300px; overflow-y: auto; overflow-x: auto; border: 1px solid var(--border); border-radius: 8px; background: rgba(0,0,0,0.2);">
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <thead style="position: sticky; top: 0; background: var(--surface); z-index: 1;">
+                            <tr>
+                                <th style="padding: 12px; text-align: left; border-bottom: 1px solid var(--border); color: var(--muted); font-size: 0.75rem; font-weight: 500;">#</th>
+                                <th style="padding: 12px; text-align: left; border-bottom: 1px solid var(--border); color: var(--text); font-size: 0.85rem; font-weight: 500;">${columnName}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${rows}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        `;
     }
 
     /**

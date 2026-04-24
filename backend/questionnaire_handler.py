@@ -35,6 +35,10 @@ def analyze_column(df: pd.DataFrame, column_name: str) -> Dict[str, Any]:
     sample_size = min(8, len(non_null_values))
     sample_values = non_null_values.sample(min(sample_size, len(non_null_values))).tolist()
     
+    # Get sample rows (for data table display)
+    sample_row_count = min(100, len(df))
+    sample_rows = df[[column_name]].head(sample_row_count).to_dict('records')
+    
     # Detect data type
     detected_type, type_details = detect_column_type(column)
     
@@ -46,6 +50,7 @@ def analyze_column(df: pd.DataFrame, column_name: str) -> Dict[str, Any]:
         'missing_count': int(missing_count),
         'missing_pct': round(missing_pct, 2),
         'sample_values': sample_values,
+        'sample_rows': sample_rows,  # Add sample rows for table display
         'unique_count': int(column.nunique()),
         'type_details': type_details
     }
