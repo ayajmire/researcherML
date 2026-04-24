@@ -483,7 +483,7 @@ const QuestionnaireClean = (function() {
     /**
      * Handle answer selection
      */
-    function handleAnswer(question, answer) {
+    async function handleAnswer(question, answer) {
         const columnName = state.columnData.column_name;
         
         if (!state.answers[columnName]) {
@@ -492,11 +492,14 @@ const QuestionnaireClean = (function() {
         
         state.answers[columnName][question] = answer;
         
+        // Save answer to localStorage for persistence
+        localStorage.setItem('questionnaire_answers', JSON.stringify(state.answers));
+        
         // Re-render to show updated state
         renderQuestionPanel();
         
-        // Update visualization
-        renderVisualization();
+        // Update visualization (async now)
+        await renderVisualization();
     }
 
     /**
@@ -672,12 +675,15 @@ const QuestionnaireClean = (function() {
     /**
      * Render visualization panel with data table + chart
      */
-    function renderVisualization() {
+    async function renderVisualization() {
         const container = document.getElementById('vizContent');
         if (!container || !state.columnData) return;
         
         const data = state.columnData;
         const answers = state.answers[data.column_name] || {};
+        
+        // Determine current type (use answer if provided, otherwise detected type)
+        const currentType = answers.q2 || data.detected_type;
         
         // Header
         const header = `
@@ -694,7 +700,7 @@ const QuestionnaireClean = (function() {
                     </div>
                     <div class="viz-stat-item">
                         <div class="viz-stat-label">Type</div>
-                        <div class="viz-stat-value">${data.detected_type}</div>
+                        <div class="viz-stat-value" style="color: var(--accent);">${currentType}</div>
                     </div>
                 </div>
             </div>
@@ -709,75 +715,94 @@ const QuestionnaireClean = (function() {
                     <div class="missing-bar-fill ${missingResolved ? 'resolved' : ''}" 
                          style="width: ${data.missing_pct}%"></div>
                 </div>
-                ${missingResolved ? '<div style="color: #065f46; font-weight: 600;">✓ Will be handled</div>' : ''}
+                ${missingResolved ? '<div style="color: #10b981; font-weight: 600;">✓ Will be handled</div>' : ''}
             </div>
         ` : '';
         
-        // Data table showing actual column values (scrollable)
-        const dataTable = renderDataTable(data);
-        
         // Chart placeholder (will be enhanced with Chart.js)
         const chart = `
-            <div class="viz-canvas" style="margin-top: 24px;">
+            <div class="viz-canvas" style="margin-top: 24px; margin-bottom: 24px;">
                 <h4 style="color: var(--text); margin-bottom: 12px; font-size: 0.9rem;">Distribution</h4>
                 <canvas id="vizChart" width="400" height="300"></canvas>
             </div>
         `;
         
-        container.innerHTML = header + missingIndicator + dataTable + chart;
+        // Data table showing ALL columns (async)
+        const dataTableHTML = await renderDataTable(data);
         
-        // Render actual chart
-        renderChart(data, answers);
+        container.innerHTML = header + missingIndicator + chart + dataTableHTML;
+        
+        // Render actual chart with current type
+        renderChart(data, answers, currentType);
     }
     
     /**
-     * Render scrollable data table for current column
+     * Render scrollable data table showing ALL columns (not just current)
      */
     function renderDataTable(data) {
-        if (!data.sample_rows || data.sample_rows.length === 0) {
-            return '<div style="color: var(--muted); padding: 20px;">No data preview available</div>';
-        }
-        
-        const columnName = data.column_name;
-        
-        // Build table rows
-        const rows = data.sample_rows.map((row, idx) => {
-            const value = row[columnName];
-            const displayValue = value === null || value === undefined || value === '' ? 
-                '<span style="color: #f59e0b; font-style: italic;">missing</span>' : 
-                String(value);
+        // Fetch full dataset to show all columns
+        return fetchFullDataPreview(data.column_name);
+    }
+    
+    /**
+     * Fetch and render full dataset preview
+     */
+    async function fetchFullDataPreview(currentColumn) {
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/data/${state.fileId}`);
+            const fullData = await response.json();
+            
+            if (!fullData.preview_data || fullData.preview_data.length === 0) {
+                return '<div style="color: var(--muted); padding: 20px;">No data preview available</div>';
+            }
+            
+            const columns = fullData.columns || [];
+            const rows = fullData.preview_data.slice(0, 100);
+            
+            // Build table header
+            const headerCells = columns.map(col => {
+                const isCurrent = col === currentColumn;
+                return `<th style="padding: 12px; text-align: left; border-bottom: 1px solid var(--border); color: ${isCurrent ? 'var(--accent)' : 'var(--text)'}; font-size: 0.85rem; font-weight: ${isCurrent ? '600' : '500'}; ${isCurrent ? 'background: rgba(125,211,252,0.1);' : ''}">${col}</th>`;
+            }).join('');
+            
+            // Build table rows
+            const tableRows = rows.map((row, idx) => {
+                const cells = columns.map(col => {
+                    const value = row[col];
+                    const isCurrent = col === currentColumn;
+                    const displayValue = value === null || value === undefined || value === '' ? 
+                        '<span style="color: #f59e0b; font-style: italic;">missing</span>' : 
+                        String(value);
+                    return `<td style="padding: 12px; color: var(--text); font-family: var(--font-mono); font-size: 0.85rem; ${isCurrent ? 'background: rgba(125,211,252,0.05);' : ''}">${displayValue}</td>`;
+                }).join('');
+                return `<tr>${cells}</tr>`;
+            }).join('');
+            
             return `
-                <tr>
-                    <td style="color: var(--muted); font-size: 0.75rem;">${idx + 1}</td>
-                    <td style="color: var(--text); font-family: var(--font-mono); font-size: 0.85rem;">${displayValue}</td>
-                </tr>
-            `;
-        }).join('');
-        
-        return `
-            <div style="margin-top: 24px;">
-                <h4 style="color: var(--text); margin-bottom: 12px; font-size: 0.9rem;">Data Preview (${data.sample_rows.length} rows)</h4>
-                <div style="max-height: 300px; overflow-y: auto; overflow-x: auto; border: 1px solid var(--border); border-radius: 8px; background: rgba(0,0,0,0.2);">
-                    <table style="width: 100%; border-collapse: collapse;">
-                        <thead style="position: sticky; top: 0; background: var(--surface); z-index: 1;">
-                            <tr>
-                                <th style="padding: 12px; text-align: left; border-bottom: 1px solid var(--border); color: var(--muted); font-size: 0.75rem; font-weight: 500;">#</th>
-                                <th style="padding: 12px; text-align: left; border-bottom: 1px solid var(--border); color: var(--text); font-size: 0.85rem; font-weight: 500;">${columnName}</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${rows}
-                        </tbody>
-                    </table>
+                <div style="margin-top: 24px;">
+                    <h4 style="color: var(--text); margin-bottom: 12px; font-size: 0.9rem;">Full Dataset Preview (${rows.length} rows × ${columns.length} columns)</h4>
+                    <div style="max-height: 350px; overflow-y: auto; overflow-x: auto; border: 1px solid var(--border); border-radius: 8px; background: rgba(0,0,0,0.2);">
+                        <table style="width: 100%; border-collapse: collapse; min-width: ${columns.length * 150}px;">
+                            <thead style="position: sticky; top: 0; background: var(--surface); z-index: 1;">
+                                <tr>${headerCells}</tr>
+                            </thead>
+                            <tbody>
+                                ${tableRows}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-            </div>
-        `;
+            `;
+        } catch (error) {
+            console.error('Error fetching full data:', error);
+            return '<div style="color: var(--muted); padding: 20px;">Error loading data preview</div>';
+        }
     }
 
     /**
-     * Render chart using Chart.js
+     * Render chart using actual data values
      */
-    function renderChart(data, answers) {
+    function renderChart(data, answers, currentType) {
         const canvas = document.getElementById('vizChart');
         if (!canvas) return;
         
@@ -787,42 +812,86 @@ const QuestionnaireClean = (function() {
         }
         
         const ctx = canvas.getContext('2d');
+        const useType = currentType || data.detected_type;
         
         // Different charts based on type
-        if (data.detected_type === 'numeric') {
-            // Histogram placeholder
-            ctx.fillStyle = '#3b82f6';
-            ctx.fillRect(50, 50, 100, 200);
-            ctx.fillRect(160, 100, 100, 150);
-            ctx.fillRect(270, 75, 100, 175);
-            
-            ctx.fillStyle = '#111827';
-            ctx.font = '14px sans-serif';
-            ctx.fillText('Distribution (histogram)', 10, 30);
-            
-        } else if (data.detected_type === 'categorical') {
-            // Bar chart for categories
-            const categories = Object.keys(data.value_counts || {}).slice(0, 5);
-            const counts = Object.values(data.value_counts || {}).slice(0, 5);
-            const maxCount = Math.max(...counts);
-            
-            categories.forEach((cat, i) => {
-                const barHeight = (counts[i] / maxCount) * 200;
-                ctx.fillStyle = '#3b82f6';
-                ctx.fillRect(50 + i * 70, 250 - barHeight, 50, barHeight);
+        if (useType === 'numeric' || useType === 'continuous') {
+            // For numeric: show histogram-style distribution
+            // Use value_counts if available, otherwise show message
+            if (data.value_counts && Object.keys(data.value_counts).length > 0) {
+                const values = Object.keys(data.value_counts).slice(0, 10).map(Number);
+                const counts = Object.values(data.value_counts).slice(0, 10);
+                const maxCount = Math.max(...counts);
                 
-                ctx.fillStyle = '#111827';
-                ctx.font = '12px sans-serif';
-                ctx.save();
-                ctx.translate(75 + i * 70, 260);
-                ctx.rotate(-Math.PI / 4);
-                ctx.fillText(String(cat).substring(0, 10), 0, 0);
-                ctx.restore();
-            });
+                // Clear canvas
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                const barWidth = canvas.width / values.length;
+                const chartHeight = canvas.height - 50;
+                
+                values.forEach((val, i) => {
+                    const barHeight = (counts[i] / maxCount) * chartHeight;
+                    const x = i * barWidth;
+                    const y = canvas.height - barHeight - 30;
+                    
+                    ctx.fillStyle = '#7dd3fc';
+                    ctx.fillRect(x + 5, y, barWidth - 10, barHeight);
+                    
+                    // Value labels
+                    ctx.fillStyle = '#9ca3af';
+                    ctx.font = '10px monospace';
+                    ctx.save();
+                    ctx.translate(x + barWidth/2, canvas.height - 10);
+                    ctx.rotate(-Math.PI/4);
+                    ctx.fillText(String(val).substring(0, 6), 0, 0);
+                    ctx.restore();
+                });
+            } else {
+                ctx.fillStyle = '#6b7280';
+                ctx.font = '14px sans-serif';
+                ctx.fillText('Numeric distribution (calculating...)', 10, canvas.height / 2);
+            }
             
-            ctx.fillStyle = '#111827';
-            ctx.font = '14px sans-serif';
-            ctx.fillText('Category distribution', 10, 30);
+        } else if (useType === 'categorical' || useType === 'text') {
+            // Bar chart for categories
+            if (data.value_counts && Object.keys(data.value_counts).length > 0) {
+                const categories = Object.keys(data.value_counts).slice(0, 10);
+                const counts = Object.values(data.value_counts).slice(0, 10);
+                const maxCount = Math.max(...counts);
+                
+                // Clear canvas
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                const barWidth = canvas.width / Math.min(categories.length, 8);
+                const chartHeight = canvas.height - 60;
+                
+                categories.forEach((cat, i) => {
+                    const barHeight = (counts[i] / maxCount) * chartHeight;
+                    const x = i * barWidth;
+                    const y = canvas.height - barHeight - 40;
+                    
+                    ctx.fillStyle = '#7dd3fc';
+                    ctx.fillRect(x + 5, y, barWidth - 10, barHeight);
+                    
+                    // Count labels on top of bars
+                    ctx.fillStyle = '#f3f4f6';
+                    ctx.font = '11px sans-serif';
+                    ctx.fillText(String(counts[i]), x + barWidth/2 - 10, y - 5);
+                    
+                    // Category labels
+                    ctx.fillStyle = '#9ca3af';
+                    ctx.font = '10px monospace';
+                    ctx.save();
+                    ctx.translate(x + barWidth/2, canvas.height - 15);
+                    ctx.rotate(-Math.PI/4);
+                    ctx.fillText(String(cat).substring(0, 12), 0, 0);
+                    ctx.restore();
+                });
+            } else {
+                ctx.fillStyle = '#6b7280';
+                ctx.font = '14px sans-serif';
+                ctx.fillText('Categorical distribution (calculating...)', 10, canvas.height / 2);
+            }
         }
     }
 

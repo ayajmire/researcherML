@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Split Layout</title>
+    <link rel="stylesheet" href="frontend/css/modern-theme.css">
+    <link rel="stylesheet" href="frontend/css/split-layout.css">
+</head>
+<body>
+    <h1 style="color: white; padding: 20px;">Split Layout Test</h1>
+    
+    <div class="split-container" id="splitContainer" style="display: flex;">
+        <div class="split-panel split-panel-left" id="questionPanel" style="background: rgba(255,0,0,0.1);">
+            <h2 style="color: white;">LEFT PANEL (Questions)</h2>
+            <p style="color: white;">This should be on the LEFT side</p>
+        </div>
+
+        <div class="split-divider" id="splitDivider"></div>
+
+        <div class="split-panel split-panel-right" id="vizPanel" style="background: rgba(0,255,0,0.1);">
+            <div class="viz-panel">
+                <h2 style="color: white;">RIGHT PANEL (Visualizations)</h2>
+                <p style="color: white;">This should be on the RIGHT side</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -30,10 +30,17 @@ def analyze_column(df: pd.DataFrame, column_name: str) -> Dict[str, Any]:
     missing_count = column.isna().sum()
     missing_pct = (missing_count / total_rows * 100) if total_rows > 0 else 0
     
-    # Get sample values (non-null)
+    # Get sample values (non-null) - prioritize diverse values
     non_null_values = column.dropna()
-    sample_size = min(8, len(non_null_values))
-    sample_values = non_null_values.sample(min(sample_size, len(non_null_values))).tolist()
+    unique_values = non_null_values.unique()
+    
+    if len(unique_values) <= 8:
+        # If 8 or fewer unique values, show all unique values
+        sample_values = unique_values[:8].tolist()
+    else:
+        # Otherwise, sample randomly from unique values to ensure diversity
+        sample_size = min(8, len(unique_values))
+        sample_values = pd.Series(unique_values).sample(sample_size).tolist()
     
     # Get sample rows (for data table display)
     sample_row_count = min(100, len(df))
