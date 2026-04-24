@@ -21,6 +21,7 @@
   "build": {
     "appId": "com.researcherml.app",
     "productName": "ResearcherML",
+    "publish": null,
     "directories": {
       "output": "dist"
     },
