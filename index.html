@@ -117,11 +117,6 @@
                     Upload & Process File
                 </button>
 
-                <button class="btn btn-secondary upload-btn" id="newUploadBtn" onclick="handleNewUploadClick(event)"
-                    style="display: none; visibility: hidden; margin-top: 15px;">
-                    Upload New File
-                </button>
-
                 <div class="loading" id="loading" style="display: none; text-align: center; padding: 60px 0;">
                     <div class="loading-spinner" style="margin: 0 auto 20px;"></div>
                     <div style="font-family: var(--font-mono); font-size: 0.85rem; color: var(--muted2); letter-spacing: 0.04em;">
@@ -250,7 +245,7 @@
                     `;
                     result.style.display = 'block';
 
-                    // Store uploaded data and show viewer
+                    // Store uploaded data
                     uploadedData = data;
 
                     // Ensure dataModified is false for new upload
@@ -260,7 +255,15 @@
                     // Persist uploaded data to localStorage so it survives page refreshes
                     localStorage.setItem('uploadedData', JSON.stringify(data));
 
-                    showDataViewer(data);
+                    // Show questionnaire for data cleaning
+                    if (window.QuestionnaireClean && data.file_ids && data.file_ids.length > 0 && data.columns) {
+                        console.log('🎯 Starting questionnaire cleaning with', data.columns.length, 'columns');
+                        window.QuestionnaireClean.init(data.file_ids[0], data.columns);
+                    } else {
+                        // Fallback to data viewer if questionnaire not available
+                        console.log('Questionnaire not available, showing data viewer');
+                        showDataViewer(data);
+                    }
 
                     // Clear the form but don't reset upload button yet
                     selectedFiles = [];

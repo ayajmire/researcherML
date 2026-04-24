@@ -27,6 +27,9 @@
 .split-panel-right {
     flex: 0 0 50%;
     background: var(--surface);
+    position: sticky;
+    top: 0;
+    max-height: calc(100vh - 120px);
 }
 
 .split-divider {
@@ -258,9 +261,13 @@
     }
 }
 
-/* Visualization panel */
+/* Visualization panel - always on right side */
 .viz-panel {
-    padding: 24px;
+    padding: 32px;
+    height: 100%;
+    overflow-y: auto;
+    background: var(--surface);
+    border-radius: var(--radius-md);
 }
 
 .viz-header {

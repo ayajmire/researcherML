@@ -56,6 +56,7 @@ const Navigation = (function() {
             'uploadSection': 'upload',
             'modelSelection': 'model',
             'dataViewer': 'viewer',
+            'questionnaireCleanPage': 'cleaning',
             'cleaningPage': 'cleaning',
             'featureEngineeringPage': 'features',
             'visualizationPage': 'visualization',

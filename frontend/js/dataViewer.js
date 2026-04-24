@@ -15,7 +15,6 @@
         const viewerContent = document.getElementById('viewerContent');
         const uploadSection = document.getElementById('uploadSection');
         const modelSelection = document.getElementById('modelSelection');
-        const newUploadBtn = document.getElementById('newUploadBtn');
         const cleaningPage = document.getElementById('cleaningPage');
         const featureEngineeringPage = document.getElementById('featureEngineeringPage');
         const visualizationPage = document.getElementById('visualizationPage');
@@ -46,16 +45,11 @@
             dataViewer.style.visibility = 'visible';
         }
 
-        // Hide ALL upload buttons - they should only be visible on upload tab
+        // Hide upload button
         const uploadBtn = document.getElementById('uploadBtn');
         if (uploadBtn) {
             uploadBtn.style.display = 'none';
             uploadBtn.style.visibility = 'hidden';
-        }
-
-        if (newUploadBtn) {
-            newUploadBtn.style.display = 'none';
-            newUploadBtn.style.visibility = 'hidden';
         }
 
         if (window.setActiveStep) {
