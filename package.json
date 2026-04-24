@@ -44,7 +44,6 @@
         "dmg",
         "zip"
       ],
-      "icon": "assets/icon.icns",
       "category": "public.app-category.developer-tools",
       "hardenedRuntime": true,
       "gatekeeperAssess": false,
@@ -55,15 +54,13 @@
       "target": [
         "nsis",
         "portable"
-      ],
-      "icon": "assets/icon.ico"
+      ]
     },
     "linux": {
       "target": [
         "AppImage",
         "deb"
       ],
-      "icon": "assets/icon.png",
       "category": "Development"
     },
     "nsis": {
